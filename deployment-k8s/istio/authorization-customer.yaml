@@ -1,0 +1,17 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: customers-allow
+  namespace: petclinic
+spec:
+  selector:
+    matchLabels:
+      service.istio.io/canonical-name: customers
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+              - cluster.local/ns/petclinic/sa/customers-service
+              - cluster.local/ns/petclinic/sa/visits-service
+

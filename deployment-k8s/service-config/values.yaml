@@ -1,0 +1,41 @@
+config:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  podAnnotations:
+    helm.sh/hook-weight: "-10"
+  livenessProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8888
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8888
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  startupProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8888
+    failureThreshold: 15
+    periodSeconds: 10
+  fullnameOverride: config-server
+  image:
+    repository: mytruong28022004/spring-petclinic-config-server
+    pullPolicy: Always
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 8888
+  ingress:
+    enabled: false

@@ -1,0 +1,12 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: config-server-allow-all
+  namespace: petclinic
+spec:
+  selector:
+    matchLabels:
+      service.istio.io/canonical-name: config
+  rules:
+    - {}
+

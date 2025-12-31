@@ -1,0 +1,50 @@
+visits:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  podAnnotations:
+    helm.sh/hook-weight: "10"
+  livenessProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8082
+    initialDelaySeconds: 120
+    periodSeconds: 30
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8082
+    initialDelaySeconds: 90
+    periodSeconds: 10
+  startupProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8082
+    failureThreshold: 30
+    periodSeconds: 10
+  initContainers:
+    - name: wait-for-dependencies
+      image: busybox:1.28
+      command: ['sh', '-c', 'until wget -T 5 -qO- http://config-server:8888/actuator/health >/dev/null 2>&1 && wget -T 5 -qO- http://discovery-server:8761/actuator/health >/dev/null 2>&1; do echo "Waiting for config-server and discovery-server"; sleep 10; done;']
+  fullnameOverride: visits-service
+  image:
+    repository: mytruong28022004/spring-petclinic-visits-service
+    pullPolicy: Always
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 8082
+  ingress:
+    enabled: false
+  env:
+  - name: EUREKA_CLIENT_ENABLED
+    value: "false"
+  - name: SPRING_CLOUD_DISCOVERY_ENABLED
+    value: "false"

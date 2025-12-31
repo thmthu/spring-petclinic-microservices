@@ -1,0 +1,6 @@
+dependencies:
+- name: service-common
+  repository: file://../service-common
+  version: 0.1.0
+digest: sha256:0ce5e98069a8613eecc6b4565fabf9b35882119cb93949d8ea9e5807d67a6ed7
+generated: "2025-12-17T15:34:19.826052833Z"

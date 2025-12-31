@@ -1,0 +1,11 @@
+apiVersion: v2
+name: service-config
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: service-common
+    version: 0.1.0
+    alias: config
+    repository: "file://../service-common"
+
