@@ -28,13 +28,13 @@ pipeline {
                             -Ddocker.image.prefix=${DOCKER_REGISTRY}
                     """
                     
-                    echo "Pushing images to registry..."
-                    sh """
-                        docker push ${DOCKER_REGISTRY}/spring-petclinic-config-server:${IMAGE_TAG}
-                        docker push ${DOCKER_REGISTRY}/spring-petclinic-customers-service:${IMAGE_TAG}
-                        docker push ${DOCKER_REGISTRY}/spring-petclinic-vets-service:${IMAGE_TAG}
-                        docker push ${DOCKER_REGISTRY}/spring-petclinic-visits-service:${IMAGE_TAG}
-                    """
+                    // echo "Pushing images to registry..."
+                    // sh """
+                    //     docker push ${DOCKER_REGISTRY}/spring-petclinic-config-server:${IMAGE_TAG}
+                    //     docker push ${DOCKER_REGISTRY}/spring-petclinic-customers-service:${IMAGE_TAG}
+                    //     docker push ${DOCKER_REGISTRY}/spring-petclinic-vets-service:${IMAGE_TAG}
+                    //     docker push ${DOCKER_REGISTRY}/spring-petclinic-visits-service:${IMAGE_TAG}
+                    // """
                 }
             }
         }
@@ -154,21 +154,21 @@ pipeline {
             }
         }
         
-        stage('Cleanup') {
-            steps {
-                script {
-                    echo "Cleaning up Helm releases and namespace ${NAMESPACE}"
-                    sh """
-                        helm uninstall config-server --namespace ${NAMESPACE} --ignore-not-found || true
-                        helm uninstall customers-service --namespace ${NAMESPACE} --ignore-not-found || true
-                        helm uninstall vets-service --namespace ${NAMESPACE} --ignore-not-found || true
-                        helm uninstall visits-service --namespace ${NAMESPACE} --ignore-not-found || true
-                        kubectl delete namespace ${NAMESPACE} --ignore-not-found=true
-                    """
-                    echo "Helm releases uninstalled and namespace ${NAMESPACE} deleted"
-                }
-            }
-        }
+        // stage('Cleanup') {
+        //     steps {
+        //         script {
+        //             echo "Cleaning up Helm releases and namespace ${NAMESPACE}"
+        //             sh """
+        //                 helm uninstall config-server --namespace ${NAMESPACE} --ignore-not-found || true
+        //                 helm uninstall customers-service --namespace ${NAMESPACE} --ignore-not-found || true
+        //                 helm uninstall vets-service --namespace ${NAMESPACE} --ignore-not-found || true
+        //                 helm uninstall visits-service --namespace ${NAMESPACE} --ignore-not-found || true
+        //                 kubectl delete namespace ${NAMESPACE} --ignore-not-found=true
+        //             """
+        //             echo "Helm releases uninstalled and namespace ${NAMESPACE} deleted"
+        //         }
+        //     }
+        // }
     }
     
     post {
