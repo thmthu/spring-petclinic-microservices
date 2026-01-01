@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'host-node'
+    }
     
     environment {
         DOCKER_REGISTRY = 'thmtthu1'
