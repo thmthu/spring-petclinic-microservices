@@ -8,6 +8,7 @@ pipeline {
         COMMIT_HASH = sh(script: 'git rev-parse --short=8 HEAD', returnStdout: true).trim()
         NAMESPACE = "ci-${COMMIT_HASH}"
         IMAGE_TAG = "ci-${COMMIT_HASH}"
+        PREFIX_RELEASE = "ci-${COMMIT_HASH}"
     }
     
     stages {
@@ -85,11 +86,9 @@ pipeline {
                         script {
                             echo "Deploying config-server to namespace ${NAMESPACE}"
                             sh """
-                                helm upgrade --install config-server deployment-k8s/service-config \
+                                helm upgrade --install config-server-${PREFIX_RELEASE} deployment-k8s/service-config \
                                     --namespace ${NAMESPACE} \
-                                    --set config.image.tag=${IMAGE_TAG} \
-                                    --wait \
-                                    --timeout 10m
+                                    --set config.image.tag=${IMAGE_TAG} 
                             """
                         }
                     }
@@ -100,11 +99,9 @@ pipeline {
                         script {
                             echo "Deploying customers-service to namespace ${NAMESPACE}"
                             sh """
-                                helm upgrade --install customers-service deployment-k8s/service-customer \
+                                helm upgrade --install customers-service-${PREFIX_RELEASE} deployment-k8s/service-customer \
                                     --namespace ${NAMESPACE} \
-                                    --set customers.image.tag=${IMAGE_TAG} \
-                                    --wait \
-                                    --timeout 10m
+                                    --set customers.image.tag=${IMAGE_TAG} 
                             """
                         }
                     }
@@ -115,11 +112,9 @@ pipeline {
                         script {
                             echo "Deploying vets-service to namespace ${NAMESPACE}"
                             sh """
-                                helm upgrade --install vets-service deployment-k8s/service-vets \
+                                helm upgrade --install vets-service-${PREFIX_RELEASE} deployment-k8s/service-vets \
                                     --namespace ${NAMESPACE} \
-                                    --set vets.image.tag=${IMAGE_TAG} \
-                                    --wait \
-                                    --timeout 10m
+                                    --set vets.image.tag=${IMAGE_TAG} 
                             """
                         }
                     }
@@ -130,11 +125,9 @@ pipeline {
                         script {
                             echo "Deploying visits-service to namespace ${NAMESPACE}"
                             sh """
-                                helm upgrade --install visits-service deployment-k8s/service-visit \
+                                helm upgrade --install visits-service-${PREFIX_RELEASE} deployment-k8s/service-visit \
                                     --namespace ${NAMESPACE} \
-                                    --set visits.image.tag=${IMAGE_TAG} \
-                                    --wait \
-                                    --timeout 10m
+                                    --set visits.image.tag=${IMAGE_TAG} 
                             """
                         }
                     }
