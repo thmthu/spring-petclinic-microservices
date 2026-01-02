@@ -29,13 +29,27 @@ pipeline {
                             -Ddocker.image.prefix=${DOCKER_REGISTRY}
                     """
                     
-                    // echo "Pushing images to registry..."
-                    // sh """
-                    //     docker push ${DOCKER_REGISTRY}/spring-petclinic-config-server:${IMAGE_TAG}
-                    //     docker push ${DOCKER_REGISTRY}/spring-petclinic-customers-service:${IMAGE_TAG}
-                    //     docker push ${DOCKER_REGISTRY}/spring-petclinic-vets-service:${IMAGE_TAG}
-                    //     docker push ${DOCKER_REGISTRY}/spring-petclinic-visits-service:${IMAGE_TAG}
-                    // """
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'dockerhub-creds-thmthu',
+                            usernameVariable: 'DOCKERHUB_USER',
+                            passwordVariable: 'DOCKERHUB_PASS'
+                        )
+                    ]) {
+                        echo "Logging in to Docker Hub"
+                        sh """
+                            echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
+                        """
+
+                        echo "Pushing images to Docker Hub"
+                        sh """
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-config-server:${IMAGE_TAG}
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-customers-service:${IMAGE_TAG}
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-vets-service:${IMAGE_TAG}
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-visits-service:${IMAGE_TAG}
+                        """
+                    }
+                   
                 }
             }
         }
