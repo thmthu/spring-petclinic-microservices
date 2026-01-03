@@ -36,7 +36,7 @@ spec:
     # Route for Customers Service API
     - match:
         - uri:
-            prefix: /api/customer/.
+            prefix: /api/customer/
       rewrite:
         uri: / 
       route:
