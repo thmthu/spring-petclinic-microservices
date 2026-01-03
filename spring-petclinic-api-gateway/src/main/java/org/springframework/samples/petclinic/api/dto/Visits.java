@@ -18,14 +18,11 @@ package org.springframework.samples.petclinic.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * @author Maciej Szarlinski
  */
-public record Visits (
-    List<VisitDetails> items
-) {
-    public Visits() {
-        this(new ArrayList<>());
-    }
+public record Visits(List<VisitDetails> items) {
+  public Visits() {
+    this(new ArrayList<>());
+  }
 }

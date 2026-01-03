@@ -20,9 +20,4 @@ package org.springframework.samples.petclinic.genai.dto;
  *
  * @author Oded Shopen
  */
-public record VisitDetails(
-    Integer id,
-    Integer petId,
-    String date,
-    String description) {
-}
+public record VisitDetails(Integer id, Integer petId, String date, String description) {}

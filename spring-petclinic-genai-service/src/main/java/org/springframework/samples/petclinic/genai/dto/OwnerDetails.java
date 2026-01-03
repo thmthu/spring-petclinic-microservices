@@ -29,6 +29,4 @@ public record OwnerDetails(
     String address,
     String city,
     String telephone,
-    List<PetDetails> pets
-) {
-}
+    List<PetDetails> pets) {}

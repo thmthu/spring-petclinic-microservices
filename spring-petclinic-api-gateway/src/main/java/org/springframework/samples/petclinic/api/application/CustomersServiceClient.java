@@ -26,16 +26,18 @@ import reactor.core.publisher.Mono;
 @Component
 public class CustomersServiceClient {
 
-    private final WebClient.Builder webClientBuilder;
+  private final WebClient.Builder webClientBuilder;
 
-    public CustomersServiceClient(WebClient.Builder webClientBuilder) {
-        this.webClientBuilder = webClientBuilder;
-    }
+  public CustomersServiceClient(WebClient.Builder webClientBuilder) {
+    this.webClientBuilder = webClientBuilder;
+  }
 
-    public Mono<OwnerDetails> getOwner(final int ownerId) {
-        return webClientBuilder.build().get()
-            .uri("http://customers-service/owners/{ownerId}", ownerId)
-            .retrieve()
-            .bodyToMono(OwnerDetails.class);
-    }
+  public Mono<OwnerDetails> getOwner(final int ownerId) {
+    return webClientBuilder
+        .build()
+        .get()
+        .uri("http://customers-service/owners/{ownerId}", ownerId)
+        .retrieve()
+        .bodyToMono(OwnerDetails.class);
+  }
 }

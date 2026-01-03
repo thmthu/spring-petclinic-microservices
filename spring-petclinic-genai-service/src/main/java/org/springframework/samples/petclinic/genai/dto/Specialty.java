@@ -20,9 +20,4 @@ package org.springframework.samples.petclinic.genai.dto;
  *
  * @author Oded Shopen
  */
-
-public record Specialty(
-    Integer id,
-    String name
-) {
-}
+public record Specialty(Integer id, String name) {}

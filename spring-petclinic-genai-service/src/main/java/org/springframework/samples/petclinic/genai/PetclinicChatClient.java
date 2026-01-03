@@ -22,18 +22,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 public class PetclinicChatClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PetclinicChatClient.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PetclinicChatClient.class);
 
-	// ChatModel is the primary interfaces for interacting with an LLM
-	// it is a request/response interface that implements the ModelModel
-	// interface. Make suer to visit the source code of the ChatModel and
-	// checkout the interfaces in the core Spring AI package.
-	private final ChatClient chatClient;
+  // ChatModel is the primary interfaces for interacting with an LLM
+  // it is a request/response interface that implements the ModelModel
+  // interface. Make suer to visit the source code of the ChatModel and
+  // checkout the interfaces in the core Spring AI package.
+  private final ChatClient chatClient;
 
-	public PetclinicChatClient(ChatClient.Builder builder, ChatMemory chatMemory) {
-		// @formatter:off
-		this.chatClient = builder
-				.defaultSystem("""
+  public PetclinicChatClient(ChatClient.Builder builder, ChatMemory chatMemory) {
+    // @formatter:off
+    this.chatClient =
+        builder
+            .defaultSystem(
+                """
                           You are a friendly AI assistant designed to help with the management of a veterinarian pet clinic called Spring Petclinic.
                           Your job is to answer questions about and to perform actions on the user's behalf, mainly around
                           veterinarians, owners, owners' pets and owners' visits.
@@ -44,32 +46,25 @@ public class PetclinicChatClient {
                           Only if the user is asking about the total number of all vets, answer that there are a lot and ask for some additional criteria.
                           For owners, pets or visits - provide the correct data.
                           """)
-				.defaultAdvisors(
-						// Chat memory helps us keep context when using the chatbot for up to 10 previous messages.
-						new MessageChatMemoryAdvisor(chatMemory, DEFAULT_CHAT_MEMORY_CONVERSATION_ID, 10), // CHAT MEMORY
-						new SimpleLoggerAdvisor()
-						)
-                .defaultFunctions("listOwners", "addOwnerToPetclinic", "addPetToOwner", "listVets")
-				.build();
+            .defaultAdvisors(
+                // Chat memory helps us keep context when using the chatbot for up to 10 previous
+                // messages.
+                new MessageChatMemoryAdvisor(
+                    chatMemory, DEFAULT_CHAT_MEMORY_CONVERSATION_ID, 10), // CHAT MEMORY
+                new SimpleLoggerAdvisor())
+            .defaultFunctions("listOwners", "addOwnerToPetclinic", "addPetToOwner", "listVets")
+            .build();
   }
 
   @PostMapping("/chatclient")
   public String exchange(@RequestBody String query) {
-	  try {
-		  //All chatbot messages go through this endpoint
-		  //and are passed to the LLM
-		  return
-		  this.chatClient
-		  .prompt()
-	      .user(
-	          u ->
-	              u.text(query)
-	              )
-	      .call()
-	      .content();
-	  } catch (Exception exception) {
-          LOG.error("Error processing chat message", exception);
- 	      return "Chat is currently unavailable. Please try again later.";
-	  }
+    try {
+      // All chatbot messages go through this endpoint
+      // and are passed to the LLM
+      return this.chatClient.prompt().user(u -> u.text(query)).call().content();
+    } catch (Exception exception) {
+      LOG.error("Error processing chat message", exception);
+      return "Chat is currently unavailable. Please try again later.";
+    }
   }
 }

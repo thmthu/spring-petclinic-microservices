@@ -19,33 +19,32 @@ import jakarta.persistence.*;
 
 /**
  * @author Juergen Hoeller
- * @author Ramazan Sakin
- * Can be Cat, Dog, Hamster...
+ * @author Ramazan Sakin Can be Cat, Dog, Hamster...
  */
 @Entity
 @Table(name = "types")
 public class PetType {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "name")
-    private String name;
+  @Column(name = "name")
+  private String name;
 
-    public Integer getId() {
-        return this.id;
-    }
+  public Integer getId() {
+    return this.id;
+  }
 
-    public String getName() {
-        return this.name;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 }

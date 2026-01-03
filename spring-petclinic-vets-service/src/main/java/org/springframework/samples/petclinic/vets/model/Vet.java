@@ -18,10 +18,9 @@ package org.springframework.samples.petclinic.vets.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.xml.bind.annotation.XmlElement;
+import java.util.*;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
-
-import java.util.*;
 
 /**
  * Simple JavaBean domain object representing a veterinarian.
@@ -37,66 +36,68 @@ import java.util.*;
 @Table(name = "vets")
 public class Vet {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "first_name")
-    @NotBlank
-    private String firstName;
+  @Column(name = "first_name")
+  @NotBlank
+  private String firstName;
 
-    @Column(name = "last_name")
-    @NotBlank
-    private String lastName;
+  @Column(name = "last_name")
+  @NotBlank
+  private String lastName;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
-        inverseJoinColumns = @JoinColumn(name = "specialty_id"))
-    private Set<Specialty> specialties;
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "vet_specialties",
+      joinColumns = @JoinColumn(name = "vet_id"),
+      inverseJoinColumns = @JoinColumn(name = "specialty_id"))
+  private Set<Specialty> specialties;
 
-    protected Set<Specialty> getSpecialtiesInternal() {
-        if (this.specialties == null) {
-            this.specialties = new HashSet<>();
-        }
-        return this.specialties;
+  protected Set<Specialty> getSpecialtiesInternal() {
+    if (this.specialties == null) {
+      this.specialties = new HashSet<>();
     }
+    return this.specialties;
+  }
 
-    @XmlElement
-    public List<Specialty> getSpecialties() {
-        List<Specialty> sortedSpecs = new ArrayList<>(getSpecialtiesInternal());
-        PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("name", true, true));
-        return Collections.unmodifiableList(sortedSpecs);
-    }
+  @XmlElement
+  public List<Specialty> getSpecialties() {
+    List<Specialty> sortedSpecs = new ArrayList<>(getSpecialtiesInternal());
+    PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("name", true, true));
+    return Collections.unmodifiableList(sortedSpecs);
+  }
 
-    public int getNrOfSpecialties() {
-        return getSpecialtiesInternal().size();
-    }
+  public int getNrOfSpecialties() {
+    return getSpecialtiesInternal().size();
+  }
 
-    public void addSpecialty(Specialty specialty) {
-        getSpecialtiesInternal().add(specialty);
-    }
+  public void addSpecialty(Specialty specialty) {
+    getSpecialtiesInternal().add(specialty);
+  }
 
-    public Integer getId() {
-        return this.id;
-    }
+  public Integer getId() {
+    return this.id;
+  }
 
-    public String getFirstName() {
-        return this.firstName;
-    }
+  public String getFirstName() {
+    return this.firstName;
+  }
 
-    public String getLastName() {
-        return this.lastName;
-    }
+  public String getLastName() {
+    return this.lastName;
+  }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
 }

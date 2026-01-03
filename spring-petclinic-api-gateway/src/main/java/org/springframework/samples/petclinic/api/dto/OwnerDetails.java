@@ -16,7 +16,6 @@
 package org.springframework.samples.petclinic.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.List;
 
 /**
@@ -31,67 +30,63 @@ public record OwnerDetails(
     String telephone,
     List<PetDetails> pets) {
 
-    @JsonIgnore
-    public List<Integer> getPetIds() {
-        return pets.stream()
-            .map(PetDetails::id)
-            .toList();
+  @JsonIgnore
+  public List<Integer> getPetIds() {
+    return pets.stream().map(PetDetails::id).toList();
+  }
+
+  public static final class OwnerDetailsBuilder {
+    private int id;
+    private String firstName;
+    private String lastName;
+    private String address;
+    private String city;
+    private String telephone;
+    private List<PetDetails> pets;
+
+    private OwnerDetailsBuilder() {}
+
+    public static OwnerDetailsBuilder anOwnerDetails() {
+      return new OwnerDetailsBuilder();
     }
 
-
-    public static final class OwnerDetailsBuilder {
-        private int id;
-        private String firstName;
-        private String lastName;
-        private String address;
-        private String city;
-        private String telephone;
-        private List<PetDetails> pets;
-
-        private OwnerDetailsBuilder() {
-        }
-
-        public static OwnerDetailsBuilder anOwnerDetails() {
-            return new OwnerDetailsBuilder();
-        }
-
-        public OwnerDetailsBuilder id(int id) {
-            this.id = id;
-            return this;
-        }
-
-        public OwnerDetailsBuilder firstName(String firstName) {
-            this.firstName = firstName;
-            return this;
-        }
-
-        public OwnerDetailsBuilder lastName(String lastName) {
-            this.lastName = lastName;
-            return this;
-        }
-
-        public OwnerDetailsBuilder address(String address) {
-            this.address = address;
-            return this;
-        }
-
-        public OwnerDetailsBuilder city(String city) {
-            this.city = city;
-            return this;
-        }
-
-        public OwnerDetailsBuilder telephone(String telephone) {
-            this.telephone = telephone;
-            return this;
-        }
-
-        public OwnerDetailsBuilder pets(List<PetDetails> pets) {
-            this.pets = pets;
-            return this;
-        }
-
-        public OwnerDetails build() {
-            return new OwnerDetails(id, firstName, lastName, address, city, telephone, pets);
-        }
+    public OwnerDetailsBuilder id(int id) {
+      this.id = id;
+      return this;
     }
+
+    public OwnerDetailsBuilder firstName(String firstName) {
+      this.firstName = firstName;
+      return this;
+    }
+
+    public OwnerDetailsBuilder lastName(String lastName) {
+      this.lastName = lastName;
+      return this;
+    }
+
+    public OwnerDetailsBuilder address(String address) {
+      this.address = address;
+      return this;
+    }
+
+    public OwnerDetailsBuilder city(String city) {
+      this.city = city;
+      return this;
+    }
+
+    public OwnerDetailsBuilder telephone(String telephone) {
+      this.telephone = telephone;
+      return this;
+    }
+
+    public OwnerDetailsBuilder pets(List<PetDetails> pets) {
+      this.pets = pets;
+      return this;
+    }
+
+    public OwnerDetails build() {
+      return new OwnerDetails(id, firstName, lastName, address, city, telephone, pets);
+    }
+  }
 }
