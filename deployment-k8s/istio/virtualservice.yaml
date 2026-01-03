@@ -9,13 +9,47 @@ spec:
   gateways:
     - petclinic-gateway
   http:
+    # Route for Vets Service API
     - match:
         - uri:
-            prefix: /api/customers
+            prefix: /api/vet/
       rewrite:
-        uri: /owners
+        uri: /
+      route:
+        - destination:
+            host: vets-service.petclinic.svc.cluster.local
+            port:
+              number: 8083
+    
+    # Route for Visits Service API
+    - match:
+        - uri:
+            prefix: /api/visit/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: visits-service.petclinic.svc.cluster.local
+            port:
+              number: 8082
+    
+    # Route for Customers Service API
+    - match:
+        - uri:
+            prefix: /api/customer/.
+      rewrite:
+        uri: / 
       route:
         - destination:
             host: customers-service.petclinic.svc.cluster.local
             port:
               number: 8081
+    # Route for Frontend UI and other paths (must be last)
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: api-gateway.petclinic.svc.cluster.local
+            port:
+              number: 8080

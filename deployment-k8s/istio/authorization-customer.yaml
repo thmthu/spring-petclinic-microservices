@@ -14,4 +14,5 @@ spec:
               - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
               - cluster.local/ns/petclinic/sa/customers-service
               - cluster.local/ns/petclinic/sa/visits-service
+              - cluster.local/ns/petclinic/sa/api-gateway
 
