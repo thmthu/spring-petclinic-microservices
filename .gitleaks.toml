@@ -83,6 +83,7 @@ paths = [
     '''\*\.lock''',
     '''\*-lock\.json''',
     '''docs/GIT-HOOKS-SETUP\.md''',
+    '''GIT-HOOKS-QUICKSTART\.md''',
     '''\.env\.example''',
 ]
 
