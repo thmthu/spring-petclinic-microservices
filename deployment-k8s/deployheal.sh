@@ -67,10 +67,24 @@ sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
     -e "s/\*\.petclinic\.svc\.cluster\.local/*.${NAMESPACE}.svc.cluster.local/g" \
     deployment-k8s/istio/destinationRule.yaml | kubectl apply -f -
 
+# AuthorizationPolicy: Thay namespace trong metadata và principals
+echo ""
+echo "Đang triển khai Istio AuthorizationPolicies..."
+
+# Authorization for Config Server (allow all)
+sed "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+    deployment-k8s/istio/authorization-config.yaml | kubectl apply -f -
+
+# Authorization for Customers Service
+sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+    -e "s/cluster\.local\/ns\/petclinic\//cluster.local\/ns\/${NAMESPACE}\//g" \
+    deployment-k8s/istio/authorization-customer.yaml | kubectl apply -f -
+
 echo ""
 echo "Đang kiểm tra Istio Gateway..."
 kubectl get gateway -n ${NAMESPACE}
 kubectl get virtualservice -n ${NAMESPACE}
+kubectl get authorizationpolicy -n ${NAMESPACE}
 
 echo ""
 echo "==================================="
