@@ -33,7 +33,7 @@ config:
   image:
     repository: thmtthu1/spring-petclinic-config-server
     pullPolicy: Always
-    tag: "latest"
+    tag: "ci-6da8086d"
   service:
     type: ClusterIP
     port: 8888

@@ -32,12 +32,12 @@ vets:
   initContainers:
     - name: wait-for-dependencies
       image: busybox:1.28
-      command: ['sh', '-c', 'until wget -T 5 -qO- http://config-server:8888/actuator/health >/dev/null 2>&1 && wget -T 5 -qO- http://discovery-server:8761/actuator/health >/dev/null 2>&1; do echo "Waiting for config-server and discovery-server"; sleep 10; done;']
+      command: ['sh', '-c', 'until wget -T 5 -qO- http://config-server:8888/actuator/health >/dev/null 2>&1; do echo "Waiting for config-server"; sleep 10; done;']
   fullnameOverride: vets-service
   image:
     repository: thmtthu1/spring-petclinic-vets-service
     pullPolicy: Always
-    tag: "latest"
+    tag: "ci-6da8086d"
   service:
     type: ClusterIP
     port: 8083
@@ -47,4 +47,12 @@ vets:
   - name: EUREKA_CLIENT_ENABLED
     value: "false"
   - name: SPRING_CLOUD_DISCOVERY_ENABLED
+    value: "false"
+  - name: CONFIG_SERVER_URL
+    value: "http://config-server:8888"
+  - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+    value: ""
+  - name: MANAGEMENT_TRACING_ENABLED
+    value: "false"
+  - name: SPRING_ZIPKIN_ENABLED
     value: "false"
