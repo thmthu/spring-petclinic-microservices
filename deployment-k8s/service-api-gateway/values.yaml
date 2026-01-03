@@ -1,0 +1,60 @@
+gateway:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  podAnnotations:
+    helm.sh/hook-weight: "20"
+  livenessProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8080
+    initialDelaySeconds: 120
+    periodSeconds: 30
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8080
+    initialDelaySeconds: 90
+    periodSeconds: 10
+  startupProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8080
+    failureThreshold: 30
+    periodSeconds: 10
+  initContainers:
+    - name: wait-for-dependencies
+      image: busybox:1.28
+      command: ['sh', '-c', 'until wget -T 5 -qO- http://config-server:8888/actuator/health >/dev/null 2>&1; do echo "Waiting for config-server"; sleep 10; done;']
+  fullnameOverride: api-gateway
+  image:
+    repository: thmtthu1/spring-petclinic-api-gateway
+    pullPolicy: Always
+    tag: "ci-096dcab4"
+  service:
+    type: ClusterIP
+    port: 8080
+  ingress:
+    enabled: false
+  env:
+  - name: EUREKA_CLIENT_ENABLED
+    value: "false"
+  - name: SPRING_CLOUD_DISCOVERY_ENABLED
+    value: "false"
+  - name: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED
+    value: "false"
+  - name: CONFIG_SERVER_URL
+    value: "http://config-server:8888"
+  - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+    value: ""
+  - name: MANAGEMENT_TRACING_ENABLED
+    value: "false"
+  - name: SPRING_ZIPKIN_ENABLED
+    value: "false"

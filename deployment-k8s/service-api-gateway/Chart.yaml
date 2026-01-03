@@ -1,0 +1,12 @@
+apiVersion: v2
+name: service-api-gateway
+description: A Helm chart for API Gateway with Frontend UI
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+dependencies:
+  - name: service-common
+    version: 0.1.0
+    repository: "file://../service-common"
+    alias: gateway
+    condition: gateway.enabled
