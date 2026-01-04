@@ -74,7 +74,6 @@ This scan checked:
 Files:
 - snyk-results.json: Full detailed results in JSON format
 - snyk-results.txt: Human-readable summary
-- snyk-monitor.json: Cloud upload confirmation (if monitor stage runs)
 
 The same 'snyk test' command scans BOTH vulnerabilities AND licenses.
 There is no separate license-only command in Snyk CLI.
@@ -87,28 +86,6 @@ READEOF
             }
         }
         
-        stage('Snyk Monitor (Optional)') {
-            steps {
-                script {
-                    echo "=== Uploading results to Snyk Cloud Dashboard ==="
-                    echo "Note: This uploads your project snapshot to Snyk's SaaS platform"
-                    echo "You can view results at: https://app.snyk.io (Snyk's web dashboard)"
-                    
-                    // Monitor project - sends snapshot to Snyk's cloud for continuous monitoring
-                    // This is OPTIONAL - only if you want cloud-based monitoring
-                    sh """
-                        snyk monitor \
-                            --all-projects \
-                            --json-file-output=${SNYK_REPORT_DIR}/snyk-monitor.json \
-                            || true
-                    """
-                    
-                    echo "Results uploaded to Snyk Cloud Dashboard"
-                    echo "Login at https://app.snyk.io with your Snyk account to view"
-                }
-            }
-        }
-        
         stage('Generate Summary Report') {
             steps {
                 script {
@@ -116,7 +93,7 @@ READEOF
                     
                     // Create a summary markdown report
                     sh """
-                        cat > ${SNYK_REPORT_DIR}/SNYK_SUMMARY.md << 'EOF'
+                        cat > ${SNYK_REPORT_DIR}/SNYK_SUMMARY.md << 'EOFSUM'
 # Snyk Security Scan Report
 
 ## Scan Information
@@ -134,29 +111,13 @@ READEOF
   - Security vulnerabilities (CVEs) with severity levels
   - License compliance issues for all dependencies
   - Upgrade paths and fix recommendations
-- **Note**: One `snyk test` command scans both security and licenses
+- **Note**: One snyk test command scans both security and licenses
 
-### 2. Snyk Monitor (Optional Cloud Upload)
-- **Note**: Snyk checks licenses automatically as part of dependency scanning
-
-### 3. Snyk Monitor (Optional Cloud Upload)
-- **File**: snyk-monitor.json
-- **Purpose**: Snapshot uploaded to Snyk's SaaS platform for continuous monitoring
-- **Cloud Dashboard**: https://app.snyk.io (Snyk's official web platform)
-- **Access**: Login with your Snyk account (free or paid)
-- **File**: snyk-monitor.json
-- **Purpose**: Continuous monitoring data uploaded to Snyk Dashboard
-- **Dashboard URL**: https://app.snyk.io
+## How to Review Reports
 
 1. **Download Artifacts**: Go to Jenkins Build Artifacts and download the snyk-reports folder
 2. **View JSON Reports**: Use any JSON viewer or jq for detailed analysis
 3. **View Text Reports**: Open .txt files for human-readable summary
-4. **Snyk Cloud Dashboard (Optional)**: If you ran 'snyk monitor', login at https://app.snyk.io
-   - This is Snyk's SaaS platform, not your own server
-   - Requires a Snyk account (free tier available)
-   - Provides web UI for vulnerability tracking
-3. **View Text Reports**: Open .txt files for human-readable summary
-4. **Snyk Dashboard**: Visit https://app.snyk.io for interactive visualization
 
 ## Vulnerability Severity Levels
 - **Critical**: Immediate action required
@@ -169,7 +130,11 @@ READEOF
 2. Prioritize fixes based on severity
 3. Update dependencies to patched versions
 4. Re-run scan to verify fixes
-5. Monitor continuous results on Snyk Dashboard
+
+EOFSUM
+                    """
+                    
+                    // Display quick summary
                     sh """
                         echo "=========================================="
                         echo "SNYK SCAN SUMMARY"
@@ -177,14 +142,7 @@ READEOF
                         ls -lh ${SNYK_REPORT_DIR}/
                         echo "=========================================="
                         echo "Reports saved to: ${SNYK_REPORT_DIR}/"
-                        echo ""
                         echo "All reports are available as Jenkins artifacts"
-                        echo "Optional: View in Snyk Cloud at https://app.snyk.io"
-                        echo "=========================================="
-                    """ ls -lh ${SNYK_REPORT_DIR}/
-                        echo "=========================================="
-                        echo "Reports saved to: ${SNYK_REPORT_DIR}/"
-                        echo "View Snyk Dashboard: https://app.snyk.io"
                         echo "=========================================="
                     """
                 }
@@ -224,20 +182,14 @@ READEOF
                 SNYK SECURITY SCAN COMPLETED
                 ===============================================
                 
+                Reports have been generated and archived:
+                - Vulnerability scan results
+                - License compliance results
+                
                 To access reports:
                 1. Go to Jenkins Build Artifacts
                 2. Download ${SNYK_REPORT_DIR} folder
                 3. Review JSON and TXT files
-                
-                Optional - Snyk Cloud Dashboard:
-                If you want web-based visualization, the 'snyk monitor' 
-                stage uploads data to Snyk's SaaS platform at:
-                https://app.snyk.io (requires Snyk account)ifacts
-                2. Download ${SNYK_REPORT_DIR} folder
-                3. Review JSON and TXT files
-                
-                For interactive dashboard:
-                Visit: https://app.snyk.io
                 
                 ===============================================
                 """
@@ -246,7 +198,6 @@ READEOF
         success {
             echo "✓ Snyk scan completed successfully"
             echo "✓ All reports generated and archived"
-            echo "✓ Check Snyk Dashboard for continuous monitoring"
         }
         failure {
             echo "✗ Snyk scan encountered issues"
