@@ -297,188 +297,123 @@ pipeline {
                     }
                 }
                 
-                stage('Scan API Gateway') {
-                    stages {
-                        stage('Deploy Baseline - API Gateway') {
-                            steps {
-                                script {
-                                    echo "Running baseline scan on API Gateway"
-                                    sh """
-                                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk -v RS='---' '/name: zap-baseline-scan-gateway/{print "---" \$0; exit}' | \\
-                                        kubectl apply -n ${NAMESPACE} -f -
-                                        
-                                        kubectl wait --for=condition=complete job/zap-baseline-scan-gateway \\
-                                            -n ${NAMESPACE} --timeout=600s || true
-                                    """
-                                }
-                            }
-                        }
-                        stage('Deploy Active - API Gateway') {
-                            steps {
-                                script {
-                                    echo "Running active scan on API Gateway"
-                                    sh """
-                                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk -v RS='---' '/name: zap-active-scan-gateway/{print "---" \$0; exit}' | \\
-                                        kubectl apply -n ${NAMESPACE} -f -
-                                        
-                                        kubectl wait --for=condition=complete job/zap-active-scan-gateway \\
-                                            -n ${NAMESPACE} --timeout=900s || true
-                                    """
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                stage('Scan Customers Service') {
-                    stages {
-                        stage('Deploy Baseline - Customers') {
-                            steps {
-                                script {
-                                    echo "Running baseline scan on Customers service"
-                                    sh """
-                                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk -v RS='---' '/name: zap-baseline-scan-customers/{print "---" \$0; exit}' | \\
-                                        kubectl apply -n ${NAMESPACE} -f -
-                                        
-                                        kubectl wait --for=condition=complete job/zap-baseline-scan-customers \\
-                                            -n ${NAMESPACE} --timeout=600s || true
-                                    """
-                                }
-                            }
-                        }
-                        stage('Deploy Active - Customers') {
-                            steps {
-                                script {
-                                    echo "Running active scan on Customers service"
-                                    sh """
-                                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk -v RS='---' '/name: zap-active-scan-customers/{print "---" \$0; exit}' | \\
-                                        kubectl apply -n ${NAMESPACE} -f -
-                                        
-                                        kubectl wait --for=condition=complete job/zap-active-scan-customers \\
-                                            -n ${NAMESPACE} --timeout=900s || true
-                                    """
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                stage('Scan Vets Service') {
-                    stages {
-                        stage('Deploy Baseline - Vets') {
-                            steps {
-                                script {
-                                    echo "Running baseline scan on Vets service"
-                                    sh """
-                                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk -v RS='---' '/name: zap-baseline-scan-vets/{print "---" \$0; exit}' | \\
-                                        kubectl apply -n ${NAMESPACE} -f -
-                                        
-                                        kubectl wait --for=condition=complete job/zap-baseline-scan-vets \\
-                                            -n ${NAMESPACE} --timeout=600s || true
-                                    """
-                                }
-                            }
-                        }
-                        stage('Deploy Active - Vets') {
-                            steps {
-                                script {
-                                    echo "Running active scan on Vets service"
-                                    sh """
-                                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk -v RS='---' '/name: zap-active-scan-vets/{print "---" \$0; exit}' | \\
-                                        kubectl apply -n ${NAMESPACE} -f -
-                                        
-                                        kubectl wait --for=condition=complete job/zap-active-scan-vets \\
-                                            -n ${NAMESPACE} --timeout=900s || true
-                                    """
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                stage('Scan Visits Service') {
-                    stages {
-                        stage('Deploy Baseline - Visits') {
-                            steps {
-                                script {
-                                    echo "Running baseline scan on Visits service"
-                                    sh """
-                                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk -v RS='---' '/name: zap-baseline-scan-visits/{print "---" \$0; exit}' | \\
-                                        kubectl apply -n ${NAMESPACE} -f -
-                                        
-                                        kubectl wait --for=condition=complete job/zap-baseline-scan-visits \\
-                                            -n ${NAMESPACE} --timeout=600s || true
-                                    """
-                                }
-                            }
-                        }
-                        stage('Deploy Active - Visits') {
-                            steps {
-                                script {
-                                    echo "Running active scan on Visits service"
-                                    sh """
-                                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk -v RS='---' '/name: zap-active-scan-visits/{print "---" \$0; exit}' | \\
-                                        kubectl apply -n ${NAMESPACE} -f -
-                                        
-                                        kubectl wait --for=condition=complete job/zap-active-scan-visits \\
-                                            -n ${NAMESPACE} --timeout=900s || true
-                                    """
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                stage('Retrieve All ZAP Reports') {
+                stage('Deploy All Baseline Scans') {
                     steps {
                         script {
-                            echo "Retrieving all ZAP scan reports"
+                            echo "Deploying all ZAP Baseline Scans"
                             sh """
-                                mkdir -p \${ZAP_REPORT_DIR}
+                                for job in zap-baseline-scan-gateway zap-baseline-scan-customers zap-baseline-scan-vets zap-baseline-scan-visits; do
+                                    echo "Deploying \\\$job..."
+                                    cat deployment-k8s/dast-zap/dast-zap.yaml | \\
+                                    sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                                        -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
+                                    awk -v RS='---' -v job="\\\$job" '\$0 ~ job {print "---" \$0; exit}' | \\
+                                    kubectl apply -n ${NAMESPACE} -f -
+                                done
                                 
-                                # Retrieve all reports
+                                echo "\\nBaseline scan jobs deployed:"
+                                kubectl get jobs -n ${NAMESPACE} -l scan-type=baseline
+                            """
+                        }
+                    }
+                }
+                
+                stage('Wait for Baseline Scans') {
+                    steps {
+                        script {
+                            echo "Waiting for all Baseline Scans to complete..."
+                            sh """
+                                for job in zap-baseline-scan-gateway zap-baseline-scan-customers zap-baseline-scan-vets zap-baseline-scan-visits; do
+                                    echo "Waiting for \\\$job..."
+                                    kubectl wait --for=condition=complete job/\\\$job \\
+                                        -n ${NAMESPACE} --timeout=600s || true
+                                done
+                                
+                                echo "\\nBaseline scan jobs status:"
+                                kubectl get jobs -n ${NAMESPACE} -l scan-type=baseline
+                            """
+                        }
+                    }
+                }
+                
+                stage('Retrieve Baseline Reports') {
+                    steps {
+                        script {
+                            echo "Retrieving all Baseline scan reports"
+                            sh """
+                                mkdir -p \${ZAP_REPORT_DIR}/baseline
+                                
                                 for service in api-gateway customers vets visits; do
-                                    echo "Retrieving reports for \\\$service..."
-                                    
-                                    # Baseline reports
+                                    echo "Retrieving baseline reports for \\\$service..."
                                     POD=\\\$(kubectl get pods -n \${NAMESPACE} -l service=\\\$service,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
                                     if [ -n "\\\$POD" ]; then
-                                        kubectl cp \${NAMESPACE}/\\\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/ 2>/dev/null || true
-                                    fi
-                                    
-                                    # Active reports
-                                    POD=\\\$(kubectl get pods -n \${NAMESPACE} -l service=\\\$service,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-                                    if [ -n "\\\$POD" ]; then
-                                        kubectl cp \${NAMESPACE}/\\\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/ 2>/dev/null || true
+                                        kubectl cp \${NAMESPACE}/\\\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/baseline/ 2>/dev/null || true
                                     fi
                                 done
                                 
-                                echo "\\nAll reports retrieved:"
-                                ls -lh \${ZAP_REPORT_DIR}/
+                                echo "\\nBaseline reports retrieved:"
+                                ls -lh \${ZAP_REPORT_DIR}/baseline/
+                            """
+                        }
+                    }
+                }
+                
+                stage('Deploy All Active Scans') {
+                    steps {
+                        script {
+                            echo "Deploying all ZAP Active Scans"
+                            sh """
+                                for job in zap-active-scan-gateway zap-active-scan-customers zap-active-scan-vets zap-active-scan-visits; do
+                                    echo "Deploying \\\$job..."
+                                    cat deployment-k8s/dast-zap/dast-zap.yaml | \\
+                                    sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                                        -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
+                                    awk -v RS='---' -v job="\\\$job" '\$0 ~ job {print "---" \$0; exit}' | \\
+                                    kubectl apply -n ${NAMESPACE} -f -
+                                done
+                                
+                                echo "\\nActive scan jobs deployed:"
+                                kubectl get jobs -n ${NAMESPACE} -l scan-type=active
+                            """
+                        }
+                    }
+                }
+                
+                stage('Wait for Active Scans') {
+                    steps {
+                        script {
+                            echo "Waiting for all Active Scans to complete..."
+                            sh """
+                                for job in zap-active-scan-gateway zap-active-scan-customers zap-active-scan-vets zap-active-scan-visits; do
+                                    echo "Waiting for \\\$job..."
+                                    kubectl wait --for=condition=complete job/\\\$job \\
+                                        -n ${NAMESPACE} --timeout=900s || true
+                                done
+                                
+                                echo "\\nActive scan jobs status:"
+                                kubectl get jobs -n ${NAMESPACE} -l scan-type=active
+                            """
+                        }
+                    }
+                }
+                
+                stage('Retrieve Active Reports') {
+                    steps {
+                        script {
+                            echo "Retrieving all Active scan reports"
+                            sh """
+                                mkdir -p \${ZAP_REPORT_DIR}/active
+                                
+                                for service in api-gateway customers vets visits; do
+                                    echo "Retrieving active reports for \\\$service..."
+                                    POD=\\\$(kubectl get pods -n \${NAMESPACE} -l service=\\\$service,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                                    if [ -n "\\\$POD" ]; then
+                                        kubectl cp \${NAMESPACE}/\\\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/active/ 2>/dev/null || true
+                                    fi
+                                done
+                                
+                                echo "\\nActive reports retrieved:"
+                                ls -lh \${ZAP_REPORT_DIR}/active/
                             """
                         }
                     }
