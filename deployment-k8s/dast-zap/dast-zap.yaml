@@ -17,6 +17,7 @@ spec:
         app: zap-scanner
         scan-type: baseline
         service: api-gateway
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: zap-scanner
       containers:
@@ -27,7 +28,6 @@ spec:
           - |
             echo "Starting ZAP Baseline Scan for API Gateway..."
             echo "Target: ${TARGET_URL}"
-            echo "Namespace: ${NAMESPACE}"
             
             zap-baseline.py \
               -t ${TARGET_URL} \
@@ -40,17 +40,15 @@ spec:
         env:
         - name: TARGET_URL
           value: "http://api-gateway.petclinic.svc.cluster.local:8080"
-        - name: NAMESPACE
-          value: "petclinic"
         volumeMounts:
         - name: zap-reports
           mountPath: /zap/wrk
         resources:
           requests:
-            memory: "512Mi"
+            memory: "1Gi"
             cpu: "500m"
           limits:
-            memory: "2Gi"
+            memory: "1.5Gi"
             cpu: "1000m"
       volumes:
       - name: zap-reports
@@ -75,6 +73,7 @@ spec:
         app: zap-scanner
         scan-type: baseline
         service: customers
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: zap-scanner
       containers:
@@ -102,10 +101,10 @@ spec:
           mountPath: /zap/wrk
         resources:
           requests:
-            memory: "512Mi"
+            memory: "768Mi"
             cpu: "500m"
           limits:
-            memory: "1Gi"
+            memory: "1.5Gi"
             cpu: "500m"
       volumes:
       - name: zap-reports
@@ -130,6 +129,7 @@ spec:
         app: zap-scanner
         scan-type: baseline
         service: vets
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: zap-scanner
       containers:
@@ -157,10 +157,10 @@ spec:
           mountPath: /zap/wrk
         resources:
           requests:
-            memory: "512Mi"
+            memory: "768Mi"
             cpu: "500m"
           limits:
-            memory: "1Gi"
+            memory: "1.5Gi"
             cpu: "500m"
       volumes:
       - name: zap-reports
@@ -185,6 +185,7 @@ spec:
         app: zap-scanner
         scan-type: baseline
         service: visits
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: zap-scanner
       containers:
@@ -212,10 +213,10 @@ spec:
           mountPath: /zap/wrk
         resources:
           requests:
-            memory: "512Mi"
+            memory: "768Mi"
             cpu: "500m"
           limits:
-            memory: "1Gi"
+            memory: "1.5Gi"
             cpu: "500m"
       volumes:
       - name: zap-reports
@@ -240,8 +241,9 @@ spec:
         app: zap-scanner
         scan-type: active
         service: api-gateway
-    spserviceAccountName: zap-scanner
-      ec:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: zap-scanner
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -266,10 +268,10 @@ spec:
           mountPath: /zap/wrk
         resources:
           requests:
-            memory: "512Mi"
+            memory: "2Gi"
             cpu: "500m"
           limits:
-            memory: "2Gi"
+            memory: "4Gi"
             cpu: "1000m"
       volumes:
       - name: zap-reports
@@ -294,8 +296,9 @@ spec:
         app: zap-scanner
         scan-type: active
         service: customers
-    spserviceAccountName: zap-scanner
-      ec:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: zap-scanner
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -320,10 +323,10 @@ spec:
           mountPath: /zap/wrk
         resources:
           requests:
-            memory: "512Mi"
+            memory: "1.5Gi"
             cpu: "500m"
           limits:
-            memory: "2Gi"
+            memory: "3Gi"
             cpu: "1000m"
       volumes:
       - name: zap-reports
@@ -348,8 +351,9 @@ spec:
         app: zap-scanner
         scan-type: active
         service: vets
-    spserviceAccountName: zap-scanner
-      ec:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: zap-scanner
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -374,10 +378,10 @@ spec:
           mountPath: /zap/wrk
         resources:
           requests:
-            memory: "512Mi"
+            memory: "1.5Gi"
             cpu: "500m"
           limits:
-            memory: "2Gi"
+            memory: "3Gi"
             cpu: "1000m"
       volumes:
       - name: zap-reports
@@ -402,8 +406,9 @@ spec:
         app: zap-scanner
         scan-type: active
         service: visits
-    spserviceAccountName: zap-scanner
-      ec:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: zap-scanner
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -428,10 +433,10 @@ spec:
           mountPath: /zap/wrk
         resources:
           requests:
-            memory: "512Mi"
+            memory: "1.5Gi"
             cpu: "500m"
           limits:
-            memory: "2Gi"
+            memory: "3Gi"
             cpu: "1000m"
       volumes:
       - name: zap-reports
