@@ -302,14 +302,11 @@ pipeline {
                         script {
                             echo "Deploying all ZAP Baseline Scans"
                             sh """
-                                for job in zap-baseline-scan-gateway zap-baseline-scan-customers zap-baseline-scan-vets zap-baseline-scan-visits; do
-                                    echo "Deploying \\\$job..."
-                                    cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                    sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                        -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                    awk -v RS='---' -v job="\\\$job" '\$0 ~ job {print "---" \$0; exit}' | \\
-                                    kubectl apply -n ${NAMESPACE} -f -
-                                done
+                                cat deployment-k8s/dast-zap/dast-zap.yaml | \\
+                                sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                                    -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
+                                grep -A 100 'scan-type: baseline' | \\
+                                kubectl apply -n ${NAMESPACE} -f -
                                 
                                 echo "\\nBaseline scan jobs deployed:"
                                 kubectl get jobs -n ${NAMESPACE} -l scan-type=baseline
@@ -363,14 +360,11 @@ pipeline {
                         script {
                             echo "Deploying all ZAP Active Scans"
                             sh """
-                                for job in zap-active-scan-gateway zap-active-scan-customers zap-active-scan-vets zap-active-scan-visits; do
-                                    echo "Deploying \\\$job..."
-                                    cat deployment-k8s/dast-zap/dast-zap.yaml | \\
-                                    sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
-                                        -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                    awk -v RS='---' -v job="\\\$job" '\$0 ~ job {print "---" \$0; exit}' | \\
-                                    kubectl apply -n ${NAMESPACE} -f -
-                                done
+                                cat deployment-k8s/dast-zap/dast-zap.yaml | \\
+                                sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                                    -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
+                                grep -A 100 'scan-type: active' | \\
+                                kubectl apply -n ${NAMESPACE} -f -
                                 
                                 echo "\\nActive scan jobs deployed:"
                                 kubectl get jobs -n ${NAMESPACE} -l scan-type=active
