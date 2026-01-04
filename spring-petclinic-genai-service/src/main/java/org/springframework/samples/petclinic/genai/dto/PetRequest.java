@@ -16,7 +16,6 @@
 package org.springframework.samples.petclinic.genai.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.util.Date;
 
 /**
@@ -24,11 +23,5 @@ import java.util.Date;
  *
  * @author Oded Shopen
  */
-public record PetRequest(int id,
-                  @JsonFormat(pattern = "yyyy-MM-dd")
-                  Date birthDate,
-                  String name,
-                  int typeId
-) {
-
-}
+public record PetRequest(
+    int id, @JsonFormat(pattern = "yyyy-MM-dd") Date birthDate, String name, int typeId) {}

@@ -1,0 +1,54 @@
+# Pre-commit hooks configuration for spring-petclinic-microservices
+# See https://pre-commit.com for more information
+
+repos:
+  # Gitleaks - Detect hardcoded secrets
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: Gitleaks Secret Scanner
+        description: Scan for hardcoded secrets, passwords, API keys
+        entry: gitleaks protect --verbose --redact --staged --config .gitleaks.toml
+        language: system
+        pass_filenames: false
+        stages: [pre-commit, pre-push]
+
+  # Additional security checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+      - id: end-of-file-fixer
+        name: Fix End of Files
+      - id: check-yaml
+        name: Check YAML syntax
+        args: ['--unsafe']  # Allow custom tags in YAML
+      - id: check-added-large-files
+        name: Check for Large Files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+        name: Check for Merge Conflicts
+      - id: detect-private-key
+        name: Detect Private Keys
+      - id: mixed-line-ending
+        name: Check Mixed Line Endings
+
+  # Java/Maven specific checks
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.12.0
+    hooks:
+      - id: pretty-format-java
+        name: Format Java Code
+        args: [--autofix]
+
+  # Docker/Dockerfile checks
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        name: Lint Dockerfiles
+
+# Global configuration
+fail_fast: false  # Continue running all hooks even if one fails
+default_stages: [pre-commit, pre-push]

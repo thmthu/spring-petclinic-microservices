@@ -10,20 +10,19 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class CircuitBreakerConfiguration {
 
-    @Bean
-    public CircuitBreakerRegistry circuitBreakerRegistry() {
-        return CircuitBreakerRegistry.ofDefaults();
-    }
+  @Bean
+  public CircuitBreakerRegistry circuitBreakerRegistry() {
+    return CircuitBreakerRegistry.ofDefaults();
+  }
 
-    @Bean
-    public TimeLimiterRegistry timeLimiterRegistry() {
-        return TimeLimiterRegistry.ofDefaults();
-    }
+  @Bean
+  public TimeLimiterRegistry timeLimiterRegistry() {
+    return TimeLimiterRegistry.ofDefaults();
+  }
 
-    @Bean
-    @Primary
-    public Resilience4JConfigurationProperties resilience4JConfigurationProperties(){
-        return  new Resilience4JConfigurationProperties();
-    }
-
+  @Bean
+  @Primary
+  public Resilience4JConfigurationProperties resilience4JConfigurationProperties() {
+    return new Resilience4JConfigurationProperties();
+  }
 }

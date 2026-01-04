@@ -15,7 +15,6 @@
  */
 package org.springframework.samples.petclinic.api.dto;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,59 +22,54 @@ import java.util.List;
  * @author Maciej Szarlinski
  */
 public record PetDetails(
-    int id,
-    String name,
-    String birthDate,
-    PetType type,
-    List<VisitDetails> visits) {
+    int id, String name, String birthDate, PetType type, List<VisitDetails> visits) {
 
-    public PetDetails {
-        if (visits == null) {
-            visits = new ArrayList<>();
-        }
+  public PetDetails {
+    if (visits == null) {
+      visits = new ArrayList<>();
+    }
+  }
+
+  public static final class PetDetailsBuilder {
+    private int id;
+    private String name;
+    private String birthDate;
+    private PetType type;
+    private List<VisitDetails> visits;
+
+    private PetDetailsBuilder() {}
+
+    public static PetDetailsBuilder aPetDetails() {
+      return new PetDetailsBuilder();
     }
 
-    public static final class PetDetailsBuilder {
-        private int id;
-        private String name;
-        private String birthDate;
-        private PetType type;
-        private List<VisitDetails> visits;
-
-        private PetDetailsBuilder() {
-        }
-
-        public static PetDetailsBuilder aPetDetails() {
-            return new PetDetailsBuilder();
-        }
-
-        public PetDetailsBuilder id(int id) {
-            this.id = id;
-            return this;
-        }
-
-        public PetDetailsBuilder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public PetDetailsBuilder birthDate(String birthDate) {
-            this.birthDate = birthDate;
-            return this;
-        }
-
-        public PetDetailsBuilder type(PetType type) {
-            this.type = type;
-            return this;
-        }
-
-        public PetDetailsBuilder visits(List<VisitDetails> visits) {
-            this.visits = visits;
-            return this;
-        }
-
-        public PetDetails build() {
-            return new PetDetails(id, name, birthDate, type, visits);
-        }
+    public PetDetailsBuilder id(int id) {
+      this.id = id;
+      return this;
     }
+
+    public PetDetailsBuilder name(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public PetDetailsBuilder birthDate(String birthDate) {
+      this.birthDate = birthDate;
+      return this;
+    }
+
+    public PetDetailsBuilder type(PetType type) {
+      this.type = type;
+      return this;
+    }
+
+    public PetDetailsBuilder visits(List<VisitDetails> visits) {
+      this.visits = visits;
+      return this;
+    }
+
+    public PetDetails build() {
+      return new PetDetails(id, name, birthDate, type, visits);
+    }
+  }
 }

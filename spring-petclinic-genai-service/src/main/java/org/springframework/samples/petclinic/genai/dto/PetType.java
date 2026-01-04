@@ -20,5 +20,4 @@ package org.springframework.samples.petclinic.genai.dto;
  *
  * @author Oded Shopen
  */
-public record PetType(String name) {
-}
+public record PetType(String name) {}

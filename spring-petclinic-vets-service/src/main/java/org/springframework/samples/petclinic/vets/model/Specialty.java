@@ -23,26 +23,25 @@ import jakarta.persistence.*;
  * @author Juergen Hoeller
  * @author Ramazan Sakin
  */
-
 @Entity
 @Table(name = "specialties")
 public class Specialty {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "name")
-    private String name;
+  @Column(name = "name")
+  private String name;
 
-    public Integer getId() {
-        return this.id;
-    }
+  public Integer getId() {
+    return this.id;
+  }
 
-    public String getName() {
-        return this.name;
-    }
+  public String getName() {
+    return this.name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 }

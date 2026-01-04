@@ -15,30 +15,26 @@
  */
 package org.springframework.samples.petclinic.customers.web;
 
+import java.util.Date;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.customers.model.Pet;
 import org.springframework.samples.petclinic.customers.model.PetType;
 
-import java.util.Date;
-
 /**
  * @author mszarlinski@bravurasolutions.com on 2016-12-05.
  */
-
 record PetDetails(
-
     long id,
-
     String name,
-
     String owner,
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    Date birthDate,
-
-    PetType type
-) {
-    public PetDetails(Pet pet) {
-        this(pet.getId(), pet.getName(), pet.getOwner().getFirstName() + " " + pet.getOwner().getLastName(), pet.getBirthDate(), pet.getType());
-    }
+    @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthDate,
+    PetType type) {
+  public PetDetails(Pet pet) {
+    this(
+        pet.getId(),
+        pet.getName(),
+        pet.getOwner().getFirstName() + " " + pet.getOwner().getLastName(),
+        pet.getBirthDate(),
+        pet.getType());
+  }
 }

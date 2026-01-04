@@ -18,19 +18,19 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class AIBeanConfiguration {
 
-	@Bean
-	public ChatMemory chatMemory() {
-		return new InMemoryChatMemory();
-	}
+  @Bean
+  public ChatMemory chatMemory() {
+    return new InMemoryChatMemory();
+  }
 
-	@Bean
-	VectorStore vectorStore(EmbeddingModel embeddingModel) {
-		return new SimpleVectorStore(embeddingModel);
-	}
-	
-    @Bean
-    @LoadBalanced
-    public WebClient.Builder loadBalancedWebClientBuilder() {
-        return WebClient.builder();
-    }
+  @Bean
+  VectorStore vectorStore(EmbeddingModel embeddingModel) {
+    return new SimpleVectorStore(embeddingModel);
+  }
+
+  @Bean
+  @LoadBalanced
+  public WebClient.Builder loadBalancedWebClientBuilder() {
+    return WebClient.builder();
+  }
 }

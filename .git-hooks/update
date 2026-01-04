@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Server-side update hook to reject pushes containing secrets
+# This should be installed on the Git server in hooks/update
+#
+# Usage: Copy this file to <bare-repo>/hooks/update on your Git server
+# Make it executable: chmod +x <bare-repo>/hooks/update
+
+set -e
+
+refname="$1"
+oldrev="$2"
+newrev="$3"
+
+echo "=== Server-side Secret Detection ==="
+echo "Ref: $refname"
+echo "Old: $oldrev"
+echo "New: $newrev"
+
+# Check if gitleaks is installed on the server
+if ! command -v gitleaks &> /dev/null; then
+    echo "WARNING: Gitleaks not installed on server. Skipping secret detection."
+    exit 0
+fi
+
+# Create a temporary directory for scanning
+tmpdir=$(mktemp -d)
+trap "rm -rf $tmpdir" EXIT
+
+# Clone or fetch the repository
+cd "$tmpdir"
+git clone --no-checkout "$GIT_DIR" repo
+cd repo
+git checkout "$newrev"
+
+# Run gitleaks on the specific commits being pushed
+if [ "$oldrev" = "0000000000000000000000000000000000000000" ]; then
+    # New branch - scan all commits
+    echo "Scanning new branch..."
+    commits="$newrev"
+else
+    # Existing branch - scan new commits only
+    echo "Scanning commits $oldrev..$newrev"
+    commits="$oldrev..$newrev"
+fi
+
+# Run gitleaks
+if gitleaks detect --verbose --redact --source . --log-opts="$commits"; then
+    echo "✅ No secrets detected. Push accepted."
+    exit 0
+else
+    echo ""
+    echo "❌ SECRETS DETECTED IN PUSH!"
+    echo "================================"
+    echo ""
+    echo "Your push has been rejected because it contains hardcoded secrets."
+    echo ""
+    echo "Required actions:"
+    echo "1. Remove the secrets from your commits"
+    echo "2. Use environment variables or secret management tools instead"
+    echo "3. If needed, rewrite Git history: git rebase -i"
+    echo "4. Force push after fixing: git push --force"
+    echo ""
+    echo "Contact your DevOps team if you need assistance."
+    echo ""
+    exit 1
+fi

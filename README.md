@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This microservices branch was initially derived from [AngularJS version](https://github.com/spring-petclinic/spring-petclinic-angular1) to demonstrate how to split sample Spring application into [microservices](http://www.martinfowler.com/articles/microservices.html).
-To achieve that goal, we use Spring Cloud Gateway, Spring Cloud Circuit Breaker, Spring Cloud Config, Micrometer Tracing, Resilience4j, Open Telemetry 
+To achieve that goal, we use Spring Cloud Gateway, Spring Cloud Circuit Breaker, Spring Cloud Config, Micrometer Tracing, Resilience4j, Open Telemetry
 and the Eureka Service Discovery from the [Spring Cloud Netflix](https://github.com/spring-cloud/spring-cloud-netflix) technology stack.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/spring-petclinic/spring-petclinic-microservices)
@@ -20,7 +20,7 @@ If everything goes well, you can access the following services at given location
 * Discovery Server - http://localhost:8761
 * Config Server - http://localhost:8888
 * AngularJS frontend (API Gateway) - http://localhost:8080
-* Customers, Vets, Visits and GenAI Services - random port, check Eureka Dashboard 
+* Customers, Vets, Visits and GenAI Services - random port, check Eureka Dashboard
 * Tracing Server (Zipkin) - http://localhost:9411/zipkin/ (we use [openzipkin](https://github.com/openzipkin/zipkin/tree/main/zipkin-server))
 * Admin Server (Spring Boot Admin) - http://localhost:9090
 * Grafana Dashboards - http://localhost:3000
@@ -49,10 +49,10 @@ For instance, if you target container images for an Apple M2, you could use the 
 ```
 
 Once images are ready, you can start them with a single command
-`docker compose up` or `podman-compose up`. 
+`docker compose up` or `podman-compose up`.
 
-Containers startup order is coordinated with the `service_healthy` condition of the Docker Compose [depends-on](https://github.com/compose-spec/compose-spec/blob/main/spec.md#depends_on) expression 
-and the [healthcheck](https://github.com/compose-spec/compose-spec/blob/main/spec.md#healthcheck) of the service containers. 
+Containers startup order is coordinated with the `service_healthy` condition of the Docker Compose [depends-on](https://github.com/compose-spec/compose-spec/blob/main/spec.md#depends_on) expression
+and the [healthcheck](https://github.com/compose-spec/compose-spec/blob/main/spec.md#healthcheck) of the service containers.
 After starting services, it takes a while for API Gateway to be in sync with service registry,
 so don't be scared of initial Spring Cloud Gateway timeouts. You can track services availability using Eureka dashboard
 available by default at http://localhost:8761.
@@ -64,7 +64,7 @@ are usually not enough and make the `docker-compose up` painfully slow.*
 
 
 ## Starting services locally with docker-compose and Java
-If you experience issues with running the system via docker-compose you can try running the `./scripts/run_all.sh` script that will start the infrastructure services via docker-compose and all the Java based applications via standard `nohup java -jar ...` command. The logs will be available under `${ROOT}/target/nameoftheapp.log`. 
+If you experience issues with running the system via docker-compose you can try running the `./scripts/run_all.sh` script that will start the infrastructure services via docker-compose and all the Java based applications via standard `nohup java -jar ...` command. The logs will be available under `${ROOT}/target/nameoftheapp.log`.
 
 Each of the java based applications is started with the `chaos-monkey` profile in order to interact with Spring Boot Chaos Monkey. You can check out the (README)[scripts/chaos/README.md] for more information about how to use the `./scripts/chaos/call_chaos.sh` helper script to enable assaults.
 
@@ -113,7 +113,7 @@ Spring Petclinic integrates a Chatbot that allows you to interact with the appli
 This `spring-petlinic-genai-service` microservice currently supports **OpenAI** (default) or **Azure's OpenAI** as the LLM provider.
 In order to start the microservice, perform the following steps:
 
-1. Decide which provider you want to use. By default, the `spring-ai-openai-spring-boot-starter` dependency is enabled. 
+1. Decide which provider you want to use. By default, the `spring-ai-openai-spring-boot-starter` dependency is enabled.
    You can change it to `spring-ai-azure-openai-spring-boot-starter`in the `pom.xml`.
 2. Create an OpenAI API key or a Azure OpenAI resource in your Azure Portal.
    Refer to the [OpenAI's quickstart](https://platform.openai.com/docs/quickstart) or [Azure's documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/) for further information on how to obtain these.
@@ -158,15 +158,15 @@ To use a MySQL database, you have to start 3 microservices (`visits-service`, `c
 with the `mysql` Spring profile. Add the `--spring.profiles.active=mysql` as programm argument.
 
 By default, at startup, database schema will be created and data will be populated.
-You may also manually create the PetClinic database and data by executing the `"db/mysql/{schema,data}.sql"` scripts of each 3 microservices. 
+You may also manually create the PetClinic database and data by executing the `"db/mysql/{schema,data}.sql"` scripts of each 3 microservices.
 In the `application.yml` of the [Configuration repository], set the `initialization-mode` to `never`.
 
 If you are running the microservices with Docker, you have to add the `mysql` profile into the (Dockerfile)[docker/Dockerfile]:
 ```
 ENV SPRING_PROFILES_ACTIVE docker,mysql
 ```
-In the `mysql section` of the `application.yml` from the [Configuration repository], you have to change 
-the host and port of your MySQL JDBC connection string. 
+In the `mysql section` of the `application.yml` from the [Configuration repository], you have to change
+the host and port of your MySQL JDBC connection string.
 
 ## Custom metrics monitoring
 
@@ -190,7 +190,7 @@ You will find the JSON configuration file here: [docker/grafana/dashboards/grafa
 The id for this dashboard is `4701`.
 
 ### Custom metrics
-Spring Boot registers a lot number of core metrics: JVM, CPU, Tomcat, Logback... 
+Spring Boot registers a lot number of core metrics: JVM, CPU, Tomcat, Logback...
 The Spring Boot auto-configuration enables the instrumentation of requests handled by Spring MVC.
 All those three REST controllers `OwnerResource`, `PetResource` and `VisitResource` have been instrumented by the `@Timed` Micrometer annotation at class level.
 
@@ -220,7 +220,7 @@ All those three REST controllers `OwnerResource`, `PetResource` and `VisitResour
 
 ## Pushing to a Docker registry
 
-Docker images for `linux/amd64` and `linux/arm64` platforms have been published into DockerHub 
+Docker images for `linux/amd64` and `linux/arm64` platforms have been published into DockerHub
 in the [springcommunity](https://hub.docker.com/u/springcommunity) organization.
 You can pull an image:
 ```bash
@@ -268,7 +268,7 @@ mvn generate-resources -P css
 The Spring Petclinic `main` branch in the main [spring-projects](https://github.com/spring-projects/spring-petclinic)
 GitHub org is the "canonical" implementation, currently based on Spring Boot and Thymeleaf.
 
-This [spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices/) project is one of the [several forks](https://spring-petclinic.github.io/docs/forks.html) 
+This [spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices/) project is one of the [several forks](https://spring-petclinic.github.io/docs/forks.html)
 hosted in a special GitHub org: [spring-petclinic](https://github.com/spring-petclinic).
 If you have a special interest in a different technology stack
 that could be used to implement the Pet Clinic then please join the community there.

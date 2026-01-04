@@ -18,5 +18,4 @@ public class MetricConfig {
   TimedAspect timedAspect(MeterRegistry registry) {
     return new TimedAspect(registry);
   }
-
 }
