@@ -305,7 +305,7 @@ pipeline {
                                 cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                 sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                     -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                awk 'BEGIN{RS="---"; ORS="---\\n"} /scan-type: baseline/' | \\
+                                awk 'BEGIN{RS="---"} /scan-type: baseline/{print "---"; print}' | \\
                                 kubectl apply -n ${NAMESPACE} -f -
                                 
                                 echo "\\nBaseline scan jobs deployed:"
@@ -363,7 +363,7 @@ pipeline {
                                 cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                 sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                     -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                awk 'BEGIN{RS="---"; ORS="---\\n"} /scan-type: active/' | \\
+                                awk 'BEGIN{RS="---"} /scan-type: active/{print "---"; print}' | \\
                                 kubectl apply -n ${NAMESPACE} -f -
                                 
                                 echo "\\nActive scan jobs deployed:"
