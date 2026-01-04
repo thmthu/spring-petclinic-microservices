@@ -224,6 +224,13 @@ pipeline {
                             -e "s/cluster\\.local\\/ns\\/petclinic\\//cluster.local\\/ns\\/${NAMESPACE}\\//g" \
                             deployment-k8s/istio/authorization-customer.yaml | kubectl apply -f -
                     """
+                    
+                    // Apply PeerAuthentication for mTLS
+                    echo "Deploying PeerAuthentication for mTLS..."
+                    sh """
+                        sed "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+                            deployment-k8s/istio/PeerAuthentication.yaml | kubectl apply -f -
+                    """
                 }
             }
         }
