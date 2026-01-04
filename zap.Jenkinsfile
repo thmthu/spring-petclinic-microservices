@@ -321,8 +321,8 @@ pipeline {
                             echo "Waiting for all Baseline Scans to complete..."
                             sh """
                                 for job in zap-baseline-scan-gateway zap-baseline-scan-customers zap-baseline-scan-vets zap-baseline-scan-visits; do
-                                    echo "Waiting for \\\$job..."
-                                    kubectl wait --for=condition=complete job/\\\$job \\
+                                    echo "Waiting for \$job..."
+                                    kubectl wait --for=condition=complete job/\$job \\
                                         -n ${NAMESPACE} --timeout=600s || true
                                 done
                                 
@@ -341,10 +341,10 @@ pipeline {
                                 mkdir -p \${ZAP_REPORT_DIR}/baseline
                                 
                                 for service in api-gateway customers vets visits; do
-                                    echo "Retrieving baseline reports for \\\$service..."
-                                    POD=\\\$(kubectl get pods -n \${NAMESPACE} -l service=\\\$service,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-                                    if [ -n "\\\$POD" ]; then
-                                        kubectl cp \${NAMESPACE}/\\\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/baseline/ 2>/dev/null || true
+                                    echo "Retrieving baseline reports for \$service..."
+                                    POD=\$(kubectl get pods -n \${NAMESPACE} -l service=\$service,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                                    if [ -n "\$POD" ]; then
+                                        kubectl cp \${NAMESPACE}/\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/baseline/ 2>/dev/null || true
                                     fi
                                 done
                                 
@@ -379,8 +379,8 @@ pipeline {
                             echo "Waiting for all Active Scans to complete..."
                             sh """
                                 for job in zap-active-scan-gateway zap-active-scan-customers zap-active-scan-vets zap-active-scan-visits; do
-                                    echo "Waiting for \\\$job..."
-                                    kubectl wait --for=condition=complete job/\\\$job \\
+                                    echo "Waiting for \$job..."
+                                    kubectl wait --for=condition=complete job/\$job \\
                                         -n ${NAMESPACE} --timeout=900s || true
                                 done
                                 
