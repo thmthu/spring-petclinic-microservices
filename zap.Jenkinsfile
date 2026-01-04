@@ -8,7 +8,7 @@ pipeline {
     environment {
         DOCKER_REGISTRY = 'thmtthu1'
         COMMIT_HASH = sh(script: 'git rev-parse --short=8 HEAD', returnStdout: true).trim()
-        NAMESPACE = "master" //"ci-${COMMIT_HASH}"
+        NAMESPACE = "petclinic" //"ci-${COMMIT_HASH}"
         IMAGE_TAG = "ci-46cc4e4c" // "ci-${COMMIT_HASH}"
         PREFIX_RELEASE = "ci-${COMMIT_HASH}"
         ZAP_REPORT_DIR = "zap-reports"
