@@ -342,7 +342,7 @@ pipeline {
                                 
                                 for service in api-gateway customers vets visits; do
                                     echo "Retrieving baseline reports for \$service..."
-                                    POD=\$(kubectl get pods -n \${NAMESPACE} -l service=\$service,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                                    POD=\$(kubectl get pods -n \${NAMESPACE} -l service=\$service,scan-type=baseline --no-headers -o custom-columns=:metadata.name 2>/dev/null | head -1)
                                     if [ -n "\$POD" ]; then
                                         kubectl cp \${NAMESPACE}/\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/baseline/ 2>/dev/null || true
                                     fi
@@ -399,10 +399,10 @@ pipeline {
                                 mkdir -p \${ZAP_REPORT_DIR}/active
                                 
                                 for service in api-gateway customers vets visits; do
-                                    echo "Retrieving active reports for \\\$service..."
-                                    POD=\\\$(kubectl get pods -n \${NAMESPACE} -l service=\\\$service,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-                                    if [ -n "\\\$POD" ]; then
-                                        kubectl cp \${NAMESPACE}/\\\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/active/ 2>/dev/null || true
+                                    echo "Retrieving active reports for \$service..."
+                                    POD=\$(kubectl get pods -n \${NAMESPACE} -l service=\$service,scan-type=active --no-headers -o custom-columns=:metadata.name 2>/dev/null | head -1)
+                                    if [ -n "\$POD" ]; then
+                                        kubectl cp \${NAMESPACE}/\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/active/ 2>/dev/null || true
                                     fi
                                 done
                                 

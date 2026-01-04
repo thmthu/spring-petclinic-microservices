@@ -9,7 +9,7 @@ metadata:
     scan-type: baseline
     service: api-gateway
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 1800
   backoffLimit: 1
   template:
     metadata:
@@ -65,7 +65,7 @@ metadata:
     scan-type: baseline
     service: customers
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 1800
   backoffLimit: 1
   template:
     metadata:
@@ -121,7 +121,7 @@ metadata:
     scan-type: baseline
     service: vets
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 1800
   backoffLimit: 1
   template:
     metadata:
@@ -177,7 +177,7 @@ metadata:
     scan-type: baseline
     service: visits
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 1800
   backoffLimit: 1
   template:
     metadata:
@@ -233,7 +233,7 @@ metadata:
     scan-type: active
     service: api-gateway
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 1800
   backoffLimit: 1
   template:
     metadata:
@@ -288,7 +288,7 @@ metadata:
     scan-type: active
     service: customers
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 1800
   backoffLimit: 1
   template:
     metadata:
@@ -343,7 +343,7 @@ metadata:
     scan-type: active
     service: vets
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 1800
   backoffLimit: 1
   template:
     metadata:
@@ -398,7 +398,7 @@ metadata:
     scan-type: active
     service: visits
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 1800
   backoffLimit: 1
   template:
     metadata:
