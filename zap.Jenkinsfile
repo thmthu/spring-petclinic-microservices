@@ -2,7 +2,9 @@ pipeline {
     agent {
         label 'host-node'
     }
-    
+    tool {
+        nodejs 'Node_23'
+    }
     environment {
         DOCKER_REGISTRY = 'thmtthu1'
         COMMIT_HASH = sh(script: 'git rev-parse --short=8 HEAD', returnStdout: true).trim()
@@ -15,6 +17,7 @@ pipeline {
         SONAR_ORG = 'thmthu'
         SONAR_PROJECT_KEY = 'thmthu_spring-petclinic-microservices'
         SONAR_PROJECT_NAME = 'spring-petclinic-microservices'
+        SNYK_TOKEN = credentials('snyk-token')
     }
     
     stages {
@@ -22,6 +25,18 @@ pipeline {
             steps {
                 echo "Checking out code..."
                 checkout scm
+            }
+        }
+        stage('Install Snyk CLI') {
+            steps {
+                sh 'npm install -g snyk'
+            }
+        }
+        stage('Snyk Dependency Scan') {
+            steps {
+                sh ''' snyk auth $SNYK_TOKEN
+                    snyk test --severity-threshold=high
+                '''
             }
         }
         stage('Build & Test') {
