@@ -15,11 +15,8 @@ spec:
               - cluster.local/ns/petclinic/sa/customers-service
               - cluster.local/ns/petclinic/sa/visits-service
               - cluster.local/ns/petclinic/sa/api-gateway
-    # Allow ZAP scanner for security testing
+    # Allow all pods in same namespace (including ZAP scanner)
     - from:
         - source:
             namespaces: ["petclinic"]
-      when:
-        - key: source.labels[app]
-          values: ["zap-scanner"]
 

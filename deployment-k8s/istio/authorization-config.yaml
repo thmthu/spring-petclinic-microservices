@@ -15,13 +15,10 @@ spec:
     to:
     - operation:
         methods: ["GET", "POST", "PUT", "DELETE"]
-  # Allow ZAP scanner for security testing
+  # Allow all pods in same namespace (including ZAP scanner)
   - from:
     - source:
         namespaces: ["petclinic"]
-    when:
-    - key: source.labels[app]
-      values: ["zap-scanner"]
 
 ---
 apiVersion: security.istio.io/v1beta1
@@ -54,13 +51,10 @@ spec:
   - from:
     - source:
         principals: ["cluster.local/ns/petclinic/sa/api-gateway"]
-  # Allow ZAP scanner for security testing
+  # Allow all pods in same namespace (including ZAP scanner)
   - from:
     - source:
         namespaces: ["petclinic"]
-    when:
-    - key: source.labels[app]
-      values: ["zap-scanner"]
 
 ---
 apiVersion: security.istio.io/v1beta1
@@ -98,14 +92,7 @@ spec:
   - from:
     - source:
         principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
-  # Allow from same namespace
+  # Allow all pods in same namespace (including ZAP scanner)
   - from:
     - source:
-        namespaces: ["petclinic"]
-  # Allow ZAP scanner explicitly
-  - from:
-    - source:
-        namespaces: ["petclinic"]
-    when:
-    - key: source.labels[app]
-      values: ["zap-scanner"] 
+        namespaces: ["petclinic"] 
