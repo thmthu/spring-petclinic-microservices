@@ -9,6 +9,8 @@ pipeline {
         NAMESPACE = "ci-${COMMIT_HASH}"
         IMAGE_TAG = "ci-${COMMIT_HASH}"
         PREFIX_RELEASE = "ci-${COMMIT_HASH}"
+        ZAP_REPORT_DIR = "zap-reports"
+        ZAP_VERSION = "stable"
     }
     
     stages {
@@ -43,11 +45,11 @@ pipeline {
 
                         echo "Pushing images to Docker Hub"
                         sh """
-                            docker push ${DOCKER_REGISTRY}/spring-petclinic-config-server:${IMAGE_TAG}
-                            docker push ${DOCKER_REGISTRY}/spring-petclinic-customers-service:${IMAGE_TAG}
-                            docker push ${DOCKER_REGISTRY}/spring-petclinic-vets-service:${IMAGE_TAG}
-                            docker push ${DOCKER_REGISTRY}/spring-petclinic-visits-service:${IMAGE_TAG}
-                            docker push ${DOCKER_REGISTRY}/spring-petclinic-api-gateway:${IMAGE_TAG}
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-config-server:${IMAGE_TAG} > /dev/null
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-customers-service:${IMAGE_TAG} > /dev/null
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-vets-service:${IMAGE_TAG} > /dev/null
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-visits-service:${IMAGE_TAG} > /dev/null
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-api-gateway:${IMAGE_TAG} > /dev/null
 
                         """
                     }
@@ -254,6 +256,109 @@ pipeline {
             }
         }
         
+        stage('Wait for Pods Ready') {
+            steps {
+                script {
+                    echo "Waiting for all pods to be ready in namespace ${NAMESPACE}"
+                    sh """
+                        kubectl wait --for=condition=ready pod --all -n ${NAMESPACE} --timeout=300s || true
+                        echo ""
+                        echo "=== Pod Status ==="
+                        kubectl get pods -n ${NAMESPACE}
+                    """
+                }
+            }
+        }
+        
+        stage('Get Application URL') {
+            steps {
+                script {
+                    echo "Getting Istio Ingress Gateway URL"
+                   
+                    
+                    env.INGRESS_HOST = sh(
+                        script: "kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.clusterIP}'",
+                        returnStdout: true
+                    ).trim()
+                    
+                    env.INGRESS_PORT = sh(
+                        script: "kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[?(@.name==\"http2\")].port}'",
+                        returnStdout: true
+                    ).trim()
+                    
+                    env.TARGET_URL = "http://${env.INGRESS_HOST}:${env.INGRESS_PORT}"
+                    
+                    echo "Target URL for ZAP scan: ${env.TARGET_URL}"
+                    
+                    // Test connectivity
+                    sh """
+                        echo "Testing connectivity to ${env.TARGET_URL}"
+                        curl -v ${env.TARGET_URL} || echo "Failed to connect, but continuing..."
+                    """
+                }
+            }
+        }
+        
+        stage('OWASP ZAP Baseline Scan') {
+            steps {
+                script {
+                    echo "Running OWASP ZAP Baseline Scan on ${env.TARGET_URL}"
+                    sh """
+                        # Create report directory and set permissions
+                        mkdir -p ${ZAP_REPORT_DIR}
+                        chmod 777 ${ZAP_REPORT_DIR}
+                        
+                        # Run ZAP baseline scan with proper user mapping
+                        docker run --rm \
+                            -v \${PWD}/${ZAP_REPORT_DIR}:/zap/wrk:rw \
+                            -u zap \
+                            --network host \
+                            ghcr.io/zaproxy/zaproxy:${ZAP_VERSION} \
+                            zap-baseline.py \
+                            -t ${env.TARGET_URL} \
+                            -r zap-baseline-report.html \
+                            -J zap-baseline-report.json \
+                            -w zap-baseline-report.md \
+                            -I || true
+                        
+                        echo "ZAP Baseline Scan completed"
+                        ls -lh ${ZAP_REPORT_DIR}/
+                        
+                        # Fix permissions for Jenkins to read (ignore errors if already readable)
+                        sudo chmod -R 755 ${ZAP_REPORT_DIR} || true
+                    """
+                }
+            }
+        }
+        
+        stage('OWASP ZAP Active Scan') {
+            steps {
+                script {
+                    echo "Running OWASP ZAP Active Scan on ${env.TARGET_URL}"
+                    sh """
+                        # Run ZAP full/active scan with proper user mapping
+                        docker run --rm \
+                            -v \${PWD}/${ZAP_REPORT_DIR}:/zap/wrk:rw \
+                            -u zap \
+                            --network host \
+                            ghcr.io/zaproxy/zaproxy:${ZAP_VERSION} \
+                            zap-full-scan.py \
+                            -t ${env.TARGET_URL} \
+                            -r zap-active-report.html \
+                            -J zap-active-report.json \
+                            -w zap-active-report.md \
+                            -I || true
+                        
+                        echo "ZAP Active Scan completed"
+                        ls -lh ${ZAP_REPORT_DIR}/
+                        
+                        # Fix permissions for Jenkins to read (ignore errors if already readable)
+                        sudo chmod -R 755 ${ZAP_REPORT_DIR} || true
+                    """
+                }
+            }
+        }
+        
         // stage('Cleanup') {
         //     steps {
         //         script {
@@ -272,11 +377,38 @@ pipeline {
     }
     
     post {
+        always {
+            script {
+                echo "Archiving ZAP reports..."
+                archiveArtifacts artifacts: "${ZAP_REPORT_DIR}/**", allowEmptyArchive: true
+                
+                echo """
+                ===============================================
+                ZAP REPORTS ARCHIVED SUCCESSFULLY
+                ===============================================
+                Reports location: ${ZAP_REPORT_DIR}/
+                
+                Available reports:
+                - zap-baseline-report.html (Baseline Scan)
+                - zap-baseline-report.json (JSON format)
+                - zap-baseline-report.md (Markdown format)
+                - zap-active-report.html (Active Scan)
+                - zap-active-report.json (JSON format)
+                - zap-active-report.md (Markdown format)
+                
+                To view HTML reports:
+                1. Go to Build Artifacts
+                2. Download and open HTML files in browser
+                ===============================================
+                """
+            }
+        }
         success {
             echo "Pipeline completed successfully!"
             echo "Namespace: ${NAMESPACE}"
             echo "Image Tag: ${IMAGE_TAG}"
-            echo "All resources have been cleaned up"
+            echo "Target URL: ${env.TARGET_URL}"
+            echo "ZAP reports archived in ${ZAP_REPORT_DIR}/"
         }
         failure {
             echo "Pipeline failed!"

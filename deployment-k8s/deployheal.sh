@@ -4,7 +4,6 @@
 PREFIX_RELEASE="ci-6da8086d"
 NAMESPACE="ci-6da8086d" 
 IMAGE_TAG="ci-6da8086d"
-IMAGE_TAG_GATEWAY="ci-096dcab4"
 
 # --- KIỂM TRA VÀ TẠO NAMESPACE ---
 if ! kubectl get namespace "${NAMESPACE}" > /dev/null 2>&1; then
@@ -44,7 +43,7 @@ helm upgrade --install visit-service-${PREFIX_RELEASE} deployment-k8s/service-vi
 # Service: Api-Gateway (Đã sửa tên release để không trùng với customer-service)
 helm upgrade --install api-gateway-${PREFIX_RELEASE} deployment-k8s/service-api-gateway \
     --namespace ${NAMESPACE} \
-    --set gateway.image.tag=${IMAGE_TAG_GATEWAY}
+    --set gateway.image.tag=${IMAGE_TAG}
 
 echo "Triển khai hoàn tất! Đang kiểm tra trạng thái Pods..."
 kubectl get pods -n ${NAMESPACE}

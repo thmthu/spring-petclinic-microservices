@@ -3,11 +3,11 @@ customers:
   replicaCount: 1
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 300m
+      memory: 384Mi
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 50m
+      memory: 128Mi
   podAnnotations:
     helm.sh/hook-weight: "10"
   livenessProbe:
