@@ -1,0 +1,431 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zap-baseline-scan-gateway
+  namespace: petclinic
+  labels:
+    app: zap-scanner
+    scan-type: baseline
+    service: api-gateway
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: zap-scanner
+        scan-type: baseline
+        service: api-gateway
+    spec:
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting ZAP Baseline Scan for API Gateway..."
+            echo "Target: ${TARGET_URL}"
+            echo "Namespace: ${NAMESPACE}"
+            
+            zap-baseline.py \
+              -t ${TARGET_URL} \
+              -j \
+              -r zap-baseline-api-gateway.html \
+              -J zap-baseline-api-gateway.json \
+              -w zap-baseline-api-gateway.md \
+              -I || true
+            echo "API Gateway baseline scan completed."
+        env:
+        - name: TARGET_URL
+          value: "http://api-gateway.petclinic.svc.cluster.local:8080"
+        - name: NAMESPACE
+          value: "petclinic"
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zap-baseline-scan-customers
+  namespace: petclinic
+  labels:
+    app: zap-scanner
+    scan-type: baseline
+    service: customers
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: zap-scanner
+        scan-type: baseline
+        service: customers
+    spec:
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting ZAP Baseline Scan for Customers Service..."
+            echo "Target: ${TARGET_URL}"
+            
+            zap-baseline.py \
+              -t ${TARGET_URL} \
+              -j \
+              -r zap-baseline-customers.html \
+              -J zap-baseline-customers.json \
+              -w zap-baseline-customers.md \
+              -I || true
+            echo "Customers service baseline scan completed."
+        env:
+        - name: TARGET_URL
+          value: "http://customers-service.petclinic.svc.cluster.local:8081"
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zap-baseline-scan-vets
+  namespace: petclinic
+  labels:
+    app: zap-scanner
+    scan-type: baseline
+    service: vets
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: zap-scanner
+        scan-type: baseline
+        service: vets
+    spec:
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting ZAP Baseline Scan for Vets Service..."
+            echo "Target: ${TARGET_URL}"
+            
+            zap-baseline.py \
+              -t ${TARGET_URL} \
+              -j \
+              -r zap-baseline-vets.html \
+              -J zap-baseline-vets.json \
+              -w zap-baseline-vets.md \
+              -I || true
+            echo "Vets service baseline scan completed."
+        env:
+        - name: TARGET_URL
+          value: "http://vets-service.petclinic.svc.cluster.local:8083"
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zap-baseline-scan-visits
+  namespace: petclinic
+  labels:
+    app: zap-scanner
+    scan-type: baseline
+    service: visits
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: zap-scanner
+        scan-type: baseline
+        service: visits
+    spec:
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting ZAP Baseline Scan for Visits Service..."
+            echo "Target: ${TARGET_URL}"
+            
+            zap-baseline.py \
+              -t ${TARGET_URL} \
+              -j \
+              -r zap-baseline-visits.html \
+              -J zap-baseline-visits.json \
+              -w zap-baseline-visits.md \
+              -I || true
+            echo "Visits service baseline scan completed."
+        env:
+        - name: TARGET_URL
+          value: "http://visits-service.petclinic.svc.cluster.local:8082"
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zap-active-scan-gateway
+  namespace: petclinic
+  labels:
+    app: zap-scanner
+    scan-type: active
+    service: api-gateway
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: zap-scanner
+        scan-type: active
+        service: api-gateway
+    spec:
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting ZAP Active Scan for API Gateway..."
+            echo "Target: ${TARGET_URL}"
+            
+            zap-full-scan.py \
+              -t ${TARGET_URL} \
+              -r zap-active-api-gateway.html \
+              -J zap-active-api-gateway.json \
+              -w zap-active-api-gateway.md \
+              -I || true
+            echo "API Gateway active scan completed."
+        env:
+        - name: TARGET_URL
+          value: "http://api-gateway.petclinic.svc.cluster.local:8080"
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zap-active-scan-customers
+  namespace: petclinic
+  labels:
+    app: zap-scanner
+    scan-type: active
+    service: customers
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: zap-scanner
+        scan-type: active
+        service: customers
+    spec:
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting ZAP Active Scan for Customers Service..."
+            echo "Target: ${TARGET_URL}"
+            
+            zap-full-scan.py \
+              -t ${TARGET_URL} \
+              -r zap-active-customers.html \
+              -J zap-active-customers.json \
+              -w zap-active-customers.md \
+              -I || true
+            echo "Customers service active scan completed."
+        env:
+        - name: TARGET_URL
+          value: "http://customers-service.petclinic.svc.cluster.local:8081"
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zap-active-scan-vets
+  namespace: petclinic
+  labels:
+    app: zap-scanner
+    scan-type: active
+    service: vets
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: zap-scanner
+        scan-type: active
+        service: vets
+    spec:
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting ZAP Active Scan for Vets Service..."
+            echo "Target: ${TARGET_URL}"
+            
+            zap-full-scan.py \
+              -t ${TARGET_URL} \
+              -r zap-active-vets.html \
+              -J zap-active-vets.json \
+              -w zap-active-vets.md \
+              -I || true
+            echo "Vets service active scan completed."
+        env:
+        - name: TARGET_URL
+          value: "http://vets-service.petclinic.svc.cluster.local:8083"
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zap-active-scan-visits
+  namespace: petclinic
+  labels:
+    app: zap-scanner
+    scan-type: active
+    service: visits
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: zap-scanner
+        scan-type: active
+        service: visits
+    spec:
+      containers:
+      - name: zap
+        image: ghcr.io/zaproxy/zaproxy:stable
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Starting ZAP Active Scan for Visits Service..."
+            echo "Target: ${TARGET_URL}"
+            
+            zap-full-scan.py \
+              -t ${TARGET_URL} \
+              -r zap-active-visits.html \
+              -J zap-active-visits.json \
+              -w zap-active-visits.md \
+              -I || true
+            echo "Visits service active scan completed."
+        env:
+        - name: TARGET_URL
+          value: "http://visits-service.petclinic.svc.cluster.local:8082"
+        volumeMounts:
+        - name: zap-reports
+          mountPath: /zap/wrk
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      - name: zap-reports
+        emptyDir: {}
+      restartPolicy: Never

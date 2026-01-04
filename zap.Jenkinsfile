@@ -319,94 +319,171 @@ pipeline {
             }
         }
         
-        stage('Get Application URL') {
+        stage('Deploy ZAP Baseline Scans') {
             steps {
                 script {
-                    echo "Getting Istio Ingress Gateway URL"
-                   
-                    
-                    env.INGRESS_HOST = sh(
-                        script: "kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.clusterIP}'",
-                        returnStdout: true
-                    ).trim()
-                    
-                    env.INGRESS_PORT = sh(
-                        script: "kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.spec.ports[?(@.name==\"http2\")].port}'",
-                        returnStdout: true
-                    ).trim()
-                    
-                    env.TARGET_URL = "http://${env.INGRESS_HOST}:${env.INGRESS_PORT}"
-                    
-                    echo "Target URL for ZAP scan: ${env.TARGET_URL}"
-                    
-                    // Test connectivity
+                    echo "Deploying OWASP ZAP Baseline Scan jobs for all services in namespace ${NAMESPACE}"
                     sh """
-                        echo "Testing connectivity to ${env.TARGET_URL}"
-                        curl -v ${env.TARGET_URL} || echo "Failed to connect, but continuing..."
+                        # Deploy baseline scans for all services
+                        cat deployment-k8s/dast-zap/dast-zap.yaml | \
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+                            -e "s/\.petclinic\.svc\.cluster\.local/.${NAMESPACE}.svc.cluster.local/g" | \
+                        kubectl apply -n ${NAMESPACE} -f -
+                        
+                        echo "Deployed ZAP baseline scans for:"
+                        kubectl get jobs -n ${NAMESPACE} -l scan-type=baseline
                     """
                 }
             }
         }
         
-        stage('OWASP ZAP Baseline Scan') {
+        stage('Wait for ZAP Baseline Scans') {
             steps {
                 script {
-                    echo "Running OWASP ZAP Baseline Scan on ${env.TARGET_URL}"
+                    echo "Waiting for all ZAP Baseline Scans to complete..."
                     sh """
-                        # Create report directory and set permissions
-                        mkdir -p ${ZAP_REPORT_DIR}
-                        chmod 777 ${ZAP_REPORT_DIR}
+                        # Wait for all baseline scan jobs
+                        for job in zap-baseline-scan-gateway zap-baseline-scan-customers zap-baseline-scan-vets zap-baseline-scan-visits; do
+                            echo "Waiting for \$job..."
+                            kubectl wait --for=condition=complete job/\$job \
+                                -n ${NAMESPACE} --timeout=600s || true
+                        done
                         
-                        # Run ZAP baseline scan with proper user mapping
-                        docker run --rm \
-                            -v \${PWD}/${ZAP_REPORT_DIR}:/zap/wrk:rw \
-                            -u zap \
-                            --network host \
-                            ghcr.io/zaproxy/zaproxy:${ZAP_VERSION} \
-                            zap-baseline.py \
-                            -t ${env.TARGET_URL} \
-                            -j \
-                            -r zap-baseline-report.html \
-                            -J zap-baseline-report.json \
-                            -w zap-baseline-report.md \
-                            -I || true
-                        
-                        echo "ZAP Baseline Scan completed"
-                        ls -lh ${ZAP_REPORT_DIR}/
-                        
-                        # Fix permissions for Jenkins to read (ignore errors if already readable)
-                        sudo chmod -R 755 ${ZAP_REPORT_DIR} || true
+                        echo "\nBaseline scan jobs status:"
+                        kubectl get jobs -n ${NAMESPACE} -l scan-type=baseline
                     """
                 }
             }
         }
         
-        stage('OWASP ZAP Active Scan') {
+        stage('Retrieve ZAP Baseline Reports') {
             steps {
                 script {
-                    echo "Running OWASP ZAP Active Scan on ${env.TARGET_URL}"
+                    echo "Retrieving ZAP Baseline Scan reports from all services"
                     sh """
-                         # Ensure report directory has write permissions for zap user
-                        chmod 777 ${ZAP_REPORT_DIR}
-
-                        # Run ZAP full/active scan with proper user mapping
-                        docker run --rm \
-                            -v \${PWD}/${ZAP_REPORT_DIR}:/zap/wrk:rw \
-                            -u zap \
-                            --network host \
-                            ghcr.io/zaproxy/zaproxy:${ZAP_VERSION} \
-                            zap-full-scan.py \
-                            -t ${env.TARGET_URL} \
-                            -r zap-active-report.html \
-                            -J zap-active-report.json \
-                            -w zap-active-report.md \
-                            -I || true
+                        # Create report directory
+                        mkdir -p ${ZAP_REPORT_DIR}/baseline
                         
-                        echo "ZAP Active Scan completed"
-                        ls -lh ${ZAP_REPORT_DIR}/
+                        # Retrieve reports from API Gateway
+                        POD=\$(kubectl get pods -n ${NAMESPACE} -l service=api-gateway,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                        if [ -n "\$POD" ]; then
+                            echo "Retrieving API Gateway baseline reports from \$POD"
+                            kubectl cp ${NAMESPACE}/\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/baseline/ 2>/dev/null || true
+                        fi
                         
-                        # Fix permissions for Jenkins to read (ignore errors if already readable)
-                        sudo chmod -R 755 ${ZAP_REPORT_DIR} || true
+                        # Retrieve reports from Customers Service
+                        POD=\$(kubectl get pods -n ${NAMESPACE} -l service=customers,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                        if [ -n "\$POD" ]; then
+                            echo "Retrieving Customers service baseline reports from \$POD"
+                            kubectl cp ${NAMESPACE}/\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/baseline/ 2>/dev/null || true
+                        fi
+                        
+                        # Retrieve reports from Vets Service
+                        POD=\$(kubectl get pods -n ${NAMESPACE} -l service=vets,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                        if [ -n "\$POD" ]; then
+                            echo "Retrieving Vets service baseline reports from \$POD"
+                            kubectl cp ${NAMESPACE}/\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/baseline/ 2>/dev/null || true
+                        fi
+                        
+                        # Retrieve reports from Visits Service
+                        POD=\$(kubectl get pods -n ${NAMESPACE} -l service=visits,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                        if [ -n "\$POD" ]; then
+                            echo "Retrieving Visits service baseline reports from \$POD"
+                            kubectl cp ${NAMESPACE}/\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/baseline/ 2>/dev/null || true
+                        fi
+                        
+                        echo "\nBaseline reports retrieved:"
+                        ls -lh ${ZAP_REPORT_DIR}/baseline/
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy ZAP Active Scans') {
+            steps {
+                script {
+                    echo "Deploying OWASP ZAP Active Scans for all services in namespace ${NAMESPACE}"
+                    sh """
+                        # Deploy active scans for all services
+                        cat deployment-k8s/dast-zap/dast-zap.yaml | \
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+                            -e "s/\.petclinic\.svc\.cluster\.local/.${NAMESPACE}.svc.cluster.local/g" | \
+                        grep -A 100 "scan-type: active" | \
+                        kubectl apply -n ${NAMESPACE} -f -
+                        
+                        echo "Deployed ZAP active scans for:"
+                        kubectl get jobs -n ${NAMESPACE} -l scan-type=active
+                    """
+                }
+            }
+        }
+        
+        stage('Wait for ZAP Active Scans') {
+            steps {
+                script {
+                    echo "Waiting for all ZAP Active Scans to complete..."
+                    sh """
+                        # Wait for all active scan jobs
+                        for job in zap-active-scan-gateway zap-active-scan-customers zap-active-scan-vets zap-active-scan-visits; do
+                            echo "Waiting for \$job..."
+                            kubectl wait --for=condition=complete job/\$job \
+                                -n ${NAMESPACE} --timeout=900s || true
+                        done
+                        
+                        echo "\nActive scan jobs status:"
+                        kubectl get jobs -n ${NAMESPACE} -l scan-type=active
+                    """
+                }
+            }
+        }
+        
+        stage('Retrieve ZAP Active Reports') {
+            steps {
+                script {
+                    echo "Retrieving ZAP Active Scan reports from all services"
+                    sh """
+                        mkdir -p ${ZAP_REPORT_DIR}/active
+                        
+                        # Retrieve reports from API Gateway
+                        POD=\$(kubectl get pods -n ${NAMESPACE} -l service=api-gateway,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                        if [ -n "\$POD" ]; then
+                            echo "Retrieving API Gateway active reports from \$POD"
+                            kubectl cp ${NAMESPACE}/\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/active/ 2>/dev/null || true
+                        fi
+                        
+                        # Retrieve reports from Customers Service
+                        POD=\$(kubectl get pods -n ${NAMESPACE} -l service=customers,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                        if [ -n "\$POD" ]; then
+                            echo "Retrieving Customers service active reports from \$POD"
+                            kubectl cp ${NAMESPACE}/\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/active/ 2>/dev/null || true
+                        fi
+                        
+                        # Retrieve reports from Vets Service
+                        POD=\$(kubectl get pods -n ${NAMESPACE} -l service=vets,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                        if [ -n "\$POD" ]; then
+                            echo "Retrieving Vets service active reports from \$POD"
+                            kubectl cp ${NAMESPACE}/\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/active/ 2>/dev/null || true
+                        fi
+                        
+                        # Retrieve reports from Visits Service
+                        POD=\$(kubectl get pods -n ${NAMESPACE} -l service=visits,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                        if [ -n "\$POD" ]; then
+                            echo "Retrieving Visits service active reports from \$POD"
+                            kubectl cp ${NAMESPACE}/\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/active/ 2>/dev/null || true
+                        fi
+                        
+                        echo "\nActive scan reports retrieved:"
+                        ls -lh ${ZAP_REPORT_DIR}/active/
+                        
+                        # Show summary from all pods
+                        echo "\n=== ZAP Active Scan Logs Summary ==="
+                        for service in api-gateway customers vets visits; do
+                            POD=\$(kubectl get pods -n ${NAMESPACE} -l service=\$service,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                            if [ -n "\$POD" ]; then
+                                echo "\n--- \$service logs ---"
+                                kubectl logs \$POD -n ${NAMESPACE} --tail=20 || true
+                            fi
+                        done
                     """
                 }
             }
@@ -415,6 +492,11 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
+                    echo "Cleaning up ZAP scan jobs"
+                    sh """
+                        kubectl delete jobs -n ${NAMESPACE} -l app=zap-scanner --ignore-not-found=true || true
+                    """
+                    
                     echo "Cleaning up Helm releases and namespace ${NAMESPACE}"
                     sh """
                         helm uninstall config-server-${PREFIX_RELEASE} --namespace ${NAMESPACE} --ignore-not-found || true
@@ -474,7 +556,6 @@ pipeline {
             echo "Pipeline completed successfully!"
             echo "Namespace: ${NAMESPACE}"
             echo "Image Tag: ${IMAGE_TAG}"
-            echo "Target URL: ${env.TARGET_URL}"
             echo "ZAP reports archived in ${ZAP_REPORT_DIR}/"
         }
         failure {
