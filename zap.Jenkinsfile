@@ -47,6 +47,8 @@ pipeline {
                             docker push ${DOCKER_REGISTRY}/spring-petclinic-customers-service:${IMAGE_TAG}
                             docker push ${DOCKER_REGISTRY}/spring-petclinic-vets-service:${IMAGE_TAG}
                             docker push ${DOCKER_REGISTRY}/spring-petclinic-visits-service:${IMAGE_TAG}
+                            docker push ${DOCKER_REGISTRY}/spring-petclinic-api-gateway:${IMAGE_TAG}
+
                         """
                     }
                    
