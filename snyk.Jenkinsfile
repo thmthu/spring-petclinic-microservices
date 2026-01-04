@@ -1,7 +1,4 @@
 pipeline {
-    agent {
-        label 'host-node'
-    }
     tools {
         nodejs 'Node_23'
     }
