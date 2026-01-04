@@ -28,7 +28,11 @@ import org.springframework.samples.petclinic.vets.system.VetsProperties;
 @SpringBootApplication
 @EnableConfigurationProperties(VetsProperties.class)
 public class VetsServiceApplication {
+	private static final String PASSWORD = "123456";
 
+    public void login() {
+        System.out.println("Password = " + PASSWORD);
+    }
 	public static void main(String[] args) {
 		SpringApplication.run(VetsServiceApplication.class, args);
 	}
