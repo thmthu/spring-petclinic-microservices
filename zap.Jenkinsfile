@@ -288,6 +288,10 @@ pipeline {
                 script {
                     echo "Deploying OWASP ZAP Baseline Scan jobs for all services in namespace ${NAMESPACE}"
                     sh """
+                        # Deploy ZAP scanner service account
+                        sed "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                            deployment-k8s/dast-zap/serviceaccount.yaml | kubectl apply -f -
+                        
                         # Deploy baseline scans for all services
                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\

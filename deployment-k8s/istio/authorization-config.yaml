@@ -11,14 +11,12 @@ spec:
   rules:
   - from:
     - source:
-        principals: ["cluster.local/ns/petclinic/sa/api-gateway"]
+        principals: 
+          - "cluster.local/ns/petclinic/sa/api-gateway"
+          - "cluster.local/ns/petclinic/sa/zap-scanner"
     to:
     - operation:
         methods: ["GET", "POST", "PUT", "DELETE"]
-  # Allow all pods in same namespace (including ZAP scanner)
-  - from:
-    - source:
-        namespaces: ["petclinic"]
 
 ---
 apiVersion: security.istio.io/v1beta1
@@ -32,11 +30,10 @@ spec:
       app: vets-service
   action: ALLOW
   rules:
-  - from:
-    - source:
-        principals: ["cluster.local/ns/petclinic/sa/api-gateway"]
-
----
+  - from:\n    - source:
+        principals: 
+          - \"cluster.local/ns/petclinic/sa/api-gateway\"
+          - \"cluster.local/ns/petclinic/sa/zap-scanner\"\n\n---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -50,11 +47,9 @@ spec:
   rules:
   - from:
     - source:
-        principals: ["cluster.local/ns/petclinic/sa/api-gateway"]
-  # Allow all pods in same namespace (including ZAP scanner)
-  - from:
-    - source:
-        namespaces: ["petclinic"]
+        principals: 
+          - "cluster.local/ns/petclinic/sa/api-gateway"
+          - "cluster.local/ns/petclinic/sa/zap-scanner"
 
 ---
 apiVersion: security.istio.io/v1beta1
@@ -88,11 +83,13 @@ spec:
       app: api-gateway
   action: ALLOW
   rules:
-  # Allow from ingress gateway
+  # Allow from ingress gateway and ZAP scanner
   - from:
     - source:
-        principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
-  # Allow all pods in same namespace (including ZAP scanner)
+        principals: 
+          - "cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+          - "cluster.local/ns/petclinic/sa/zap-scanner"
+  # Allow from other services in namespace
   - from:
     - source:
         namespaces: ["petclinic"] 

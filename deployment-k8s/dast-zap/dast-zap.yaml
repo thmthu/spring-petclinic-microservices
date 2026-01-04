@@ -18,6 +18,7 @@ spec:
         scan-type: baseline
         service: api-gateway
     spec:
+      serviceAccountName: zap-scanner
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -75,6 +76,7 @@ spec:
         scan-type: baseline
         service: customers
     spec:
+      serviceAccountName: zap-scanner
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -129,6 +131,7 @@ spec:
         scan-type: baseline
         service: vets
     spec:
+      serviceAccountName: zap-scanner
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -183,6 +186,7 @@ spec:
         scan-type: baseline
         service: visits
     spec:
+      serviceAccountName: zap-scanner
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -236,7 +240,8 @@ spec:
         app: zap-scanner
         scan-type: active
         service: api-gateway
-    spec:
+    spserviceAccountName: zap-scanner
+      ec:
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -289,7 +294,8 @@ spec:
         app: zap-scanner
         scan-type: active
         service: customers
-    spec:
+    spserviceAccountName: zap-scanner
+      ec:
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -342,7 +348,8 @@ spec:
         app: zap-scanner
         scan-type: active
         service: vets
-    spec:
+    spserviceAccountName: zap-scanner
+      ec:
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
@@ -395,7 +402,8 @@ spec:
         app: zap-scanner
         scan-type: active
         service: visits
-    spec:
+    spserviceAccountName: zap-scanner
+      ec:
       containers:
       - name: zap
         image: ghcr.io/zaproxy/zaproxy:stable
