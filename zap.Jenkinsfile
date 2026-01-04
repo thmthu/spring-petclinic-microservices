@@ -359,21 +359,35 @@ pipeline {
             }
         }
         
-        // stage('Cleanup') {
-        //     steps {
-        //         script {
-        //             echo "Cleaning up Helm releases and namespace ${NAMESPACE}"
-        //             sh """
-        //                 helm uninstall config-server --namespace ${NAMESPACE} --ignore-not-found || true
-        //                 helm uninstall customers-service --namespace ${NAMESPACE} --ignore-not-found || true
-        //                 helm uninstall vets-service --namespace ${NAMESPACE} --ignore-not-found || true
-        //                 helm uninstall visits-service --namespace ${NAMESPACE} --ignore-not-found || true
-        //                 kubectl delete namespace ${NAMESPACE} --ignore-not-found=true
-        //             """
-        //             echo "Helm releases uninstalled and namespace ${NAMESPACE} deleted"
-        //         }
-        //     }
-        // }
+        stage('Cleanup') {
+            steps {
+                script {
+                    echo "Cleaning up Helm releases and namespace ${NAMESPACE}"
+                    sh """
+                        helm uninstall config-server-${PREFIX_RELEASE} --namespace ${NAMESPACE} --ignore-not-found || true
+                        helm uninstall customer-service-${PREFIX_RELEASE} --namespace ${NAMESPACE} --ignore-not-found || true
+                        helm uninstall vets-service-${PREFIX_RELEASE} --namespace ${NAMESPACE} --ignore-not-found || true
+                        helm uninstall visit-service-${PREFIX_RELEASE} --namespace ${NAMESPACE} --ignore-not-found || true
+                        helm uninstall api-gateway-${PREFIX_RELEASE} --namespace ${NAMESPACE} --ignore-not-found || true
+                        kubectl delete namespace ${NAMESPACE} --ignore-not-found=true
+                    """
+                    echo "Helm releases uninstalled and namespace ${NAMESPACE} deleted"
+                    
+                    echo "Cleaning up Docker images with tag ${IMAGE_TAG}"
+                    sh """
+                        docker rmi ${DOCKER_REGISTRY}/spring-petclinic-config-server:${IMAGE_TAG} || true
+                        docker rmi ${DOCKER_REGISTRY}/spring-petclinic-customers-service:${IMAGE_TAG} || true
+                        docker rmi ${DOCKER_REGISTRY}/spring-petclinic-vets-service:${IMAGE_TAG} || true
+                        docker rmi ${DOCKER_REGISTRY}/spring-petclinic-visits-service:${IMAGE_TAG} || true
+                        docker rmi ${DOCKER_REGISTRY}/spring-petclinic-api-gateway:${IMAGE_TAG} || true
+                        
+                        echo "Cleaning up dangling images..."
+                        docker image prune -f || true
+                    """
+                    echo "Docker images cleaned up"
+                }
+            }
+        }
     }
     
     post {
