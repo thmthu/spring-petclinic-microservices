@@ -307,7 +307,7 @@ pipeline {
                                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                             -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk '/name: zap-baseline-scan-gateway/,/^---/' | \\
+                                        awk -v RS='---' '/name: zap-baseline-scan-gateway/{print "---" \$0; exit}' | \\
                                         kubectl apply -n ${NAMESPACE} -f -
                                         
                                         kubectl wait --for=condition=complete job/zap-baseline-scan-gateway \\
@@ -324,7 +324,7 @@ pipeline {
                                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                             -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk '/name: zap-active-scan-gateway/,/^---/' | \\
+                                        awk -v RS='---' '/name: zap-active-scan-gateway/{print "---" \$0; exit}' | \\
                                         kubectl apply -n ${NAMESPACE} -f -
                                         
                                         kubectl wait --for=condition=complete job/zap-active-scan-gateway \\
@@ -346,7 +346,7 @@ pipeline {
                                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                             -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk '/name: zap-baseline-scan-customers/,/^---/' | \\
+                                        awk -v RS='---' '/name: zap-baseline-scan-customers/{print "---" \$0; exit}' | \\
                                         kubectl apply -n ${NAMESPACE} -f -
                                         
                                         kubectl wait --for=condition=complete job/zap-baseline-scan-customers \\
@@ -363,7 +363,7 @@ pipeline {
                                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                             -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk '/name: zap-active-scan-customers/,/^---/' | \\
+                                        awk -v RS='---' '/name: zap-active-scan-customers/{print "---" \$0; exit}' | \\
                                         kubectl apply -n ${NAMESPACE} -f -
                                         
                                         kubectl wait --for=condition=complete job/zap-active-scan-customers \\
@@ -385,7 +385,7 @@ pipeline {
                                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                             -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk '/name: zap-baseline-scan-vets/,/^---/' | \\
+                                        awk -v RS='---' '/name: zap-baseline-scan-vets/{print "---" \$0; exit}' | \\
                                         kubectl apply -n ${NAMESPACE} -f -
                                         
                                         kubectl wait --for=condition=complete job/zap-baseline-scan-vets \\
@@ -402,7 +402,7 @@ pipeline {
                                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                             -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk '/name: zap-active-scan-vets/,/^---/' | \\
+                                        awk -v RS='---' '/name: zap-active-scan-vets/{print "---" \$0; exit}' | \\
                                         kubectl apply -n ${NAMESPACE} -f -
                                         
                                         kubectl wait --for=condition=complete job/zap-active-scan-vets \\
@@ -424,7 +424,7 @@ pipeline {
                                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                             -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk '/name: zap-baseline-scan-visits/,/^---/' | \\
+                                        awk -v RS='---' '/name: zap-baseline-scan-visits/{print "---" \$0; exit}' | \\
                                         kubectl apply -n ${NAMESPACE} -f -
                                         
                                         kubectl wait --for=condition=complete job/zap-baseline-scan-visits \\
@@ -441,7 +441,7 @@ pipeline {
                                         cat deployment-k8s/dast-zap/dast-zap.yaml | \\
                                         sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
                                             -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
-                                        awk '/name: zap-active-scan-visits/,/EOF/' | \\
+                                        awk -v RS='---' '/name: zap-active-scan-visits/{print "---" \$0; exit}' | \\
                                         kubectl apply -n ${NAMESPACE} -f -
                                         
                                         kubectl wait --for=condition=complete job/zap-active-scan-visits \\
