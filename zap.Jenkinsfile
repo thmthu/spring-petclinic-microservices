@@ -82,12 +82,19 @@ pipeline {
             }
         }
         
-        stage('Create Namespace') {
+        stage('Create Namespace with Istio') {
             steps {
                 script {
-                    echo "Creating namespace ${NAMESPACE}"
+                    echo "Creating namespace ${NAMESPACE} with Istio injection enabled"
                     sh """
-                        kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+                        if ! kubectl get namespace ${NAMESPACE} > /dev/null 2>&1; then
+                            echo "Creating namespace ${NAMESPACE}..."
+                            kubectl create namespace ${NAMESPACE}
+                            kubectl label namespace ${NAMESPACE} istio-injection=enabled
+                        else
+                            echo "Namespace ${NAMESPACE} already exists"
+                            kubectl label namespace ${NAMESPACE} istio-injection=enabled --overwrite
+                        fi
                     """
                 }
             }
@@ -113,7 +120,7 @@ pipeline {
                         script {
                             echo "Deploying customers-service to namespace ${NAMESPACE}"
                             sh """
-                                helm upgrade --install customers-service-${PREFIX_RELEASE} deployment-k8s/service-customer \
+                                helm upgrade --install customer-service-${PREFIX_RELEASE} deployment-k8s/service-customer \
                                     --namespace ${NAMESPACE} \
                                     --set customers.image.tag=${IMAGE_TAG} 
                             """
@@ -139,9 +146,22 @@ pipeline {
                         script {
                             echo "Deploying visits-service to namespace ${NAMESPACE}"
                             sh """
-                                helm upgrade --install visits-service-${PREFIX_RELEASE} deployment-k8s/service-visit \
+                                helm upgrade --install visit-service-${PREFIX_RELEASE} deployment-k8s/service-visit \
                                     --namespace ${NAMESPACE} \
                                     --set visits.image.tag=${IMAGE_TAG} 
+                            """
+                        }
+                    }
+                }
+                
+                stage('Deploy API Gateway') {
+                    steps {
+                        script {
+                            echo "Deploying api-gateway to namespace ${NAMESPACE}"
+                            sh """
+                                helm upgrade --install api-gateway-${PREFIX_RELEASE} deployment-k8s/service-api-gateway \
+                                    --namespace ${NAMESPACE} \
+                                    --set gateway.image.tag=${IMAGE_TAG} 
                             """
                         }
                     }
@@ -156,6 +176,77 @@ pipeline {
                     sh """
                         kubectl get pods -n ${NAMESPACE}
                         kubectl get services -n ${NAMESPACE}
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy Istio Resources') {
+            steps {
+                script {
+                    echo "Deploying Istio Gateway and VirtualService to namespace ${NAMESPACE}"
+                    
+                    // Deploy Gateway
+                    sh """
+                        sed "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+                            deployment-k8s/istio/gateway.yaml | kubectl apply -f -
+                    """
+                    
+                    // Deploy VirtualService
+                    sh """
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" \
+                            deployment-k8s/istio/virtualservice.yaml | kubectl apply -f -
+                    """
+                    
+                    // Deploy DestinationRule
+                    sh """
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+                            -e "s/\\*\\.petclinic\\.svc\\.cluster\\.local/*.${NAMESPACE}.svc.cluster.local/g" \
+                            deployment-k8s/istio/destinationRule.yaml | kubectl apply -f -
+                    """
+                    
+                    echo "Deploying Istio AuthorizationPolicies..."
+                    
+                    // Authorization for Config Server
+                    sh """
+                        sed "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+                            deployment-k8s/istio/authorization-config.yaml | kubectl apply -f -
+                    """
+                    
+                    // Authorization for Customers Service
+                    sh """
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
+                            -e "s/cluster\\.local\\/ns\\/petclinic\\//cluster.local\\/ns\\/${NAMESPACE}\\//g" \
+                            deployment-k8s/istio/authorization-customer.yaml | kubectl apply -f -
+                    """
+                }
+            }
+        }
+        
+        stage('Verify Istio Configuration') {
+            steps {
+                script {
+                    echo "Verifying Istio resources in namespace ${NAMESPACE}"
+                    sh """
+                        echo "=== Istio Gateways ==="
+                        kubectl get gateway -n ${NAMESPACE}
+                        
+                        echo ""
+                        echo "=== Istio VirtualServices ==="
+                        kubectl get virtualservice -n ${NAMESPACE}
+                        
+                        echo ""
+                        echo "=== Istio DestinationRules ==="
+                        kubectl get destinationrule -n ${NAMESPACE}
+                        
+                        echo ""
+                        echo "=== Istio AuthorizationPolicies ==="
+                        kubectl get authorizationpolicy -n ${NAMESPACE}
+                        
+                        echo ""
+                        echo "=== Istio Ingress Gateway Status ==="
+                        kubectl get svc istio-ingressgateway -n istio-system
                     """
                 }
             }
