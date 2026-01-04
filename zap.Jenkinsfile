@@ -458,27 +458,27 @@ pipeline {
                         script {
                             echo "Retrieving all ZAP scan reports"
                             sh """
-                                mkdir -p ${ZAP_REPORT_DIR}
+                                mkdir -p \${ZAP_REPORT_DIR}
                                 
                                 # Retrieve all reports
                                 for service in api-gateway customers vets visits; do
-                                    echo "Retrieving reports for \$service..."
+                                    echo "Retrieving reports for \\\$service..."
                                     
                                     # Baseline reports
-                                    POD=\\$(kubectl get pods -n ${NAMESPACE} -l service=\\$service,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-                                    if [ -n "\\$POD" ]; then
-                                        kubectl cp ${NAMESPACE}/\\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/ 2>/dev/null || true
+                                    POD=\\\$(kubectl get pods -n \${NAMESPACE} -l service=\\\$service,scan-type=baseline -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                                    if [ -n "\\\$POD" ]; then
+                                        kubectl cp \${NAMESPACE}/\\\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/ 2>/dev/null || true
                                     fi
                                     
                                     # Active reports
-                                    POD=\\$(kubectl get pods -n ${NAMESPACE} -l service=\\$service,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-                                    if [ -n "\\$POD" ]; then
-                                        kubectl cp ${NAMESPACE}/\\$POD:/zap/wrk/. ${ZAP_REPORT_DIR}/ 2>/dev/null || true
+                                    POD=\\\$(kubectl get pods -n \${NAMESPACE} -l service=\\\$service,scan-type=active -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+                                    if [ -n "\\\$POD" ]; then
+                                        kubectl cp \${NAMESPACE}/\\\$POD:/zap/wrk/. \${ZAP_REPORT_DIR}/ 2>/dev/null || true
                                     fi
                                 done
                                 
                                 echo "\\nAll reports retrieved:"
-                                ls -lh ${ZAP_REPORT_DIR}/
+                                ls -lh \${ZAP_REPORT_DIR}/
                             """
                         }
                     }
