@@ -1,12 +1,69 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: config-server-allow-all
+  name: allow-api-to-backends
   namespace: petclinic
 spec:
   selector:
     matchLabels:
-      service.istio.io/canonical-name: config
+      app: customers-service 
+  action: ALLOW
   rules:
-    - {}
+  - from:
+    - source:
+        principals: ["cluster.local/ns/petclinic/sa/api-gateway"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
 
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-api-to-vets
+  namespace: petclinic
+spec:
+  selector:
+    matchLabels:
+      app: vets-service
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/petclinic/sa/api-gateway"]
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-api-to-visits
+  namespace: petclinic
+spec:
+  selector:
+    matchLabels:
+      app: visits-service
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/petclinic/sa/api-gateway"]
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-all-to-config
+  namespace: petclinic
+spec:
+  selector:
+    matchLabels:
+      app: config-server
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        namespaces: ["petclinic"] 
+    to:
+    - operation:
+        methods: ["GET"] 
+        ports: ["8888"] 
