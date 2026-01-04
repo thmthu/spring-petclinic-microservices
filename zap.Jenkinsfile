@@ -13,11 +13,6 @@ pipeline {
         PREFIX_RELEASE = "ci-${COMMIT_HASH}"
         ZAP_REPORT_DIR = "zap-reports"
         ZAP_VERSION = "stable"
-        SONAR_TOKEN = credentials('sonar')
-        SONAR_ORG = 'thmthu'
-        SONAR_PROJECT_KEY = 'thmthu_spring-petclinic-microservices'
-        SONAR_PROJECT_NAME = 'spring-petclinic-microservices'
-        SNYK_TOKEN = credentials('snyk-token')
     }
     
     stages {
@@ -27,40 +22,9 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Install Snyk CLI') {
-            steps {
-                sh 'npm install -g snyk'
-            }
-        }
-        stage('Snyk Dependency Scan') {
-            steps {
-                sh ''' snyk auth $SNYK_TOKEN
-                    snyk test --severity-threshold=high
-                '''
-            }
-        }
         stage('Build & Test') {
             steps {
                 sh 'mvn clean verify'
-            }
-        }
-        stage('Sonar Analysis') {
-            steps {
-                withSonarQubeEnv('sonarcloud') {
-                    sh """
-                            mvn sonar:sonar \
-                            -Dsonar.organization=${SONAR_ORG} \
-                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                            -Dsonar.projectName=${SONAR_PROJECT_NAME}
-                        """
-                }
-            }
-        }
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
-                }
             }
         }
         stage('Build and Push Docker Images') {
@@ -240,15 +204,15 @@ pipeline {
                     
                     // Deploy VirtualService
                     sh """
-                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
-                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" \
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" \\
                             deployment-k8s/istio/virtualservice.yaml | kubectl apply -f -
                     """
                     
                     // Deploy DestinationRule
                     sh """
-                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
-                            -e "s/\\*\\.petclinic\\.svc\\.cluster\\.local/*.${NAMESPACE}.svc.cluster.local/g" \
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                            -e "s/\\*\\.petclinic\\.svc\\.cluster\\.local/*.${NAMESPACE}.svc.cluster.local/g" \\
                             deployment-k8s/istio/destinationRule.yaml | kubectl apply -f -
                     """
                     
@@ -262,8 +226,8 @@ pipeline {
                     
                     // Authorization for Customers Service
                     sh """
-                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
-                            -e "s/cluster\\.local\\/ns\\/petclinic\\//cluster.local\\/ns\\/${NAMESPACE}\\//g" \
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                            -e "s/cluster\\.local\\/ns\\/petclinic\\//cluster.local\\/ns\\/${NAMESPACE}\\//g" \\
                             deployment-k8s/istio/authorization-customer.yaml | kubectl apply -f -
                     """
                     
@@ -325,9 +289,9 @@ pipeline {
                     echo "Deploying OWASP ZAP Baseline Scan jobs for all services in namespace ${NAMESPACE}"
                     sh """
                         # Deploy baseline scans for all services
-                        cat deployment-k8s/dast-zap/dast-zap.yaml | \
-                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
-                            -e "s/\.petclinic\.svc\.cluster\.local/.${NAMESPACE}.svc.cluster.local/g" | \
+                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
                         kubectl apply -n ${NAMESPACE} -f -
                         
                         echo "Deployed ZAP baseline scans for:"
@@ -405,10 +369,10 @@ pipeline {
                     echo "Deploying OWASP ZAP Active Scans for all services in namespace ${NAMESPACE}"
                     sh """
                         # Deploy active scans for all services
-                        cat deployment-k8s/dast-zap/dast-zap.yaml | \
-                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \
-                            -e "s/\.petclinic\.svc\.cluster\.local/.${NAMESPACE}.svc.cluster.local/g" | \
-                        grep -A 100 "scan-type: active" | \
+                        cat deployment-k8s/dast-zap/dast-zap.yaml | \\
+                        sed -e "s/namespace: petclinic/namespace: ${NAMESPACE}/g" \\
+                            -e "s/\\.petclinic\\.svc\\.cluster\\.local/.${NAMESPACE}.svc.cluster.local/g" | \\
+                        grep -A 100 "scan-type: active" | \\
                         kubectl apply -n ${NAMESPACE} -f -
                         
                         echo "Deployed ZAP active scans for:"

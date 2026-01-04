@@ -15,6 +15,13 @@ spec:
     to:
     - operation:
         methods: ["GET", "POST", "PUT", "DELETE"]
+  # Allow ZAP scanner for security testing
+  - from:
+    - source:
+        namespaces: ["petclinic"]
+    when:
+    - key: source.labels[app]
+      values: ["zap-scanner"]
 
 ---
 apiVersion: security.istio.io/v1beta1
@@ -47,6 +54,13 @@ spec:
   - from:
     - source:
         principals: ["cluster.local/ns/petclinic/sa/api-gateway"]
+  # Allow ZAP scanner for security testing
+  - from:
+    - source:
+        namespaces: ["petclinic"]
+    when:
+    - key: source.labels[app]
+      values: ["zap-scanner"]
 
 ---
 apiVersion: security.istio.io/v1beta1
@@ -66,4 +80,32 @@ spec:
     to:
     - operation:
         methods: ["GET"] 
-        ports: ["8888"] 
+        ports: ["8888"]
+  # ZAP scanner is already allowed by namespace rule above
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-zap-to-api-gateway
+  namespace: petclinic
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  action: ALLOW
+  rules:
+  # Allow from ingress gateway
+  - from:
+    - source:
+        principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+  # Allow from same namespace
+  - from:
+    - source:
+        namespaces: ["petclinic"]
+  # Allow ZAP scanner explicitly
+  - from:
+    - source:
+        namespaces: ["petclinic"]
+    when:
+    - key: source.labels[app]
+      values: ["zap-scanner"] 
