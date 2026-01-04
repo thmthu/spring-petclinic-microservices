@@ -365,6 +365,7 @@ pipeline {
                             ghcr.io/zaproxy/zaproxy:${ZAP_VERSION} \
                             zap-baseline.py \
                             -t ${env.TARGET_URL} \
+                            -j \
                             -r zap-baseline-report.html \
                             -J zap-baseline-report.json \
                             -w zap-baseline-report.md \
@@ -385,6 +386,9 @@ pipeline {
                 script {
                     echo "Running OWASP ZAP Active Scan on ${env.TARGET_URL}"
                     sh """
+                         # Ensure report directory has write permissions for zap user
+                        chmod 777 ${ZAP_REPORT_DIR}
+
                         # Run ZAP full/active scan with proper user mapping
                         docker run --rm \
                             -v \${PWD}/${ZAP_REPORT_DIR}:/zap/wrk:rw \
