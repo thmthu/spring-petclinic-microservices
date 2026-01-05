@@ -6,7 +6,7 @@ pipeline {
         nodejs 'Node_23'
     }
     environment {
-        SNYK_TOKEN = credentials('snyk-token')
+        SNYK_TOKEN = credentials('thmthu-snyk')
         SNYK_REPORT_DIR = "snyk-reports"
     }
     
@@ -85,7 +85,18 @@ READEOF
                 }
             }
         }
-        
+        stage('Snyk Monitor') {
+            steps {
+                script {
+                    echo "=== Sending Project Snapshot to Snyk Dashboard ==="
+                    // Lệnh này sẽ đăng ký dự án lên Dashboard của Snyk
+                    // Sử dụng --all-projects để monitor tất cả các microservices
+                    sh 'snyk monitor --all-projects'
+                    
+                    echo "✓ Snapshot sent! You can now see the project on your Snyk UI."
+                }
+            }
+        }
         stage('Generate Summary Report') {
             steps {
                 script {
