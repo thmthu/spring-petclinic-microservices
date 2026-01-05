@@ -20,7 +20,7 @@
         <webjars-angular.version>1.8.3</webjars-angular.version>
         <webjars-angular-ui-router.version>1.0.30</webjars-angular-ui-router.version>
         <webjars-marked.version>14.1.2</webjars-marked.version>
-        <squareup-okhttp3.version>4.12.0</squareup-okhttp3.version>
+        <squareup-okhttp3.version>5.0.0-alpha.14</squareup-okhttp3.version>
 
         <libsass-maven-plugin.version>0.2.29</libsass-maven-plugin.version>
         <docker.image.exposed.port>8081</docker.image.exposed.port>
@@ -69,6 +69,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
+            <version>4.2.7</version>
         </dependency>
 
         <!-- Third parties -->
