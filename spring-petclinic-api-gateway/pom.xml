@@ -25,6 +25,8 @@
         <libsass-maven-plugin.version>0.2.29</libsass-maven-plugin.version>
         <docker.image.exposed.port>8081</docker.image.exposed.port>
         <docker.image.dockerfile.dir>${basedir}/../docker</docker.image.dockerfile.dir>
+        <logback.version>1.5.13</logback.version>
+    
     </properties>
 
     <dependencies>
