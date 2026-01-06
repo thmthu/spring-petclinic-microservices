@@ -20,6 +20,10 @@ spec:
             host: vets-service.petclinic.svc.cluster.local
             port:
               number: 8083
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,reset,connect-failure,refused-stream
     
     # Route for Visits Service API
     - match:
@@ -32,6 +36,10 @@ spec:
             host: visits-service.petclinic.svc.cluster.local
             port:
               number: 8082
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,reset,connect-failure,refused-stream
     
     # Route for Customers Service API
     - match:
@@ -44,6 +52,10 @@ spec:
             host: customers-service.petclinic.svc.cluster.local
             port:
               number: 8081
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,reset,connect-failure,refused-stream
     # Route for Frontend UI and other paths (must be last)
     - match:
         - uri:
@@ -53,3 +65,7 @@ spec:
             host: api-gateway.petclinic.svc.cluster.local
             port:
               number: 8080
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,reset,connect-failure,refused-stream
